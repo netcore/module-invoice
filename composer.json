@@ -1,0 +1,22 @@
+{
+    "name": "netcore/invoice",
+    "description": "Module for invoices.",
+    "type": "module",
+    "homepage": "http://netcore.lv",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Viktors Ņikiforovs",
+            "email": "viktors.nikiforovs@netcore.lv"
+        }
+    ],
+    "autoload": {
+        "psr-4": {
+            "Modules\\Invoice\\": ""
+        }
+    },
+    "require": {
+        "php": ">=7.0"
+    },
+    "minimum-stability": "dev"
+}

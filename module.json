@@ -1,0 +1,16 @@
+{
+    "name": "Invoice",
+    "alias": "invoice",
+    "description": "Invoice module.",
+    "keywords": [],
+    "active": 1,
+    "order": 0,
+    "providers": [
+        "Modules\\Invoice\\Providers\\InvoiceServiceProvider"
+    ],
+    "aliases": {},
+    "files": [
+        "start.php"
+    ],
+    "requires": []
+}
