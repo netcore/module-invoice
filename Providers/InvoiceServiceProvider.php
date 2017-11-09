@@ -2,6 +2,7 @@
 
 namespace Modules\Invoice\Providers;
 
+use Illuminate\Foundation\AliasLoader;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Database\Eloquent\Factory;
 
@@ -34,7 +35,11 @@ class InvoiceServiceProvider extends ServiceProvider
      */
     public function register()
     {
-        //
+        // Register providers
+        $this->app->register(\Barryvdh\Snappy\ServiceProvider::class);
+
+        // Register facades
+        AliasLoader::getInstance()->alias('PDF', \Barryvdh\Snappy\Facades\SnappyPdf::class);
     }
 
     /**
@@ -45,11 +50,12 @@ class InvoiceServiceProvider extends ServiceProvider
     protected function registerConfig()
     {
         $this->publishes([
-            __DIR__.'/../Config/config.php' => config_path('netcore/module-invoice.php'),
+            __DIR__ . '/../Config/config.php' => config_path('netcore/module-invoice.php'),
+            __DIR__ . '/../Config/snappy.php' => config_path('netcore/module-invoice-snappy.php'),
         ], 'config');
 
         $this->mergeConfigFrom(
-            __DIR__.'/../Config/config.php', 'netcore.module-invoice'
+            __DIR__ . '/../Config/config.php', 'netcore.module-invoice'
         );
     }
 
@@ -62,10 +68,10 @@ class InvoiceServiceProvider extends ServiceProvider
     {
         $viewPath = resource_path('views/modules/invoice');
 
-        $sourcePath = __DIR__.'/../Resources/views';
+        $sourcePath = __DIR__ . '/../Resources/views';
 
         $this->publishes([
-            $sourcePath => $viewPath
+            $sourcePath => $viewPath,
         ]);
 
         $this->loadViewsFrom(array_merge(array_map(function ($path) {
@@ -85,7 +91,7 @@ class InvoiceServiceProvider extends ServiceProvider
         if (is_dir($langPath)) {
             $this->loadTranslationsFrom($langPath, 'invoice');
         } else {
-            $this->loadTranslationsFrom(__DIR__ .'/../Resources/lang', 'invoice');
+            $this->loadTranslationsFrom(__DIR__ . '/../Resources/lang', 'invoice');
         }
     }
 

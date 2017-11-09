@@ -13,14 +13,20 @@ class CreateInvoicesTable extends Migration
      */
     public function up()
     {
-        Schema::create('invoices', function (Blueprint $table) {
+        Schema::create('netcore_invoice__invoices', function (Blueprint $table) {
             $table->increments('id');
 
-            // Invoice can be attached to specific user
-            $table->unsignedInteger('user_id')->index()->nullable();
+            $table->unsignedInteger('user_id')->index()->nullable(); // can be attached to user
+            $table->unsignedInteger('order_id')->index()->nullable(); // can be attached to order
 
-            // Invoice can be attached to specific order
-            $table->unsignedInteger('order_id')->index()->nullable();
+            $table->string('invoice_nr')->index()->nullable();
+            $table->decimal('total_with_vat', 7, 2)->default(0);
+            $table->decimal('total_without_vat', 7, 2)->default(0);
+            $table->unsignedInteger('vat')->nullable();
+
+            $table->text('sender_data')->nullable();
+            $table->text('receiver_data')->nullable();
+            $table->text('data')->nullable();
 
             $table->timestamps();
             $table->softDeletes();

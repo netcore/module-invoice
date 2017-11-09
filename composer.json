@@ -16,7 +16,8 @@
         }
     },
     "require": {
-        "php": ">=7.0"
+        "php": ">=7.0",
+        "barryvdh/laravel-snappy": "^0.4.0"
     },
     "minimum-stability": "dev"
 }

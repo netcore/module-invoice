@@ -2,10 +2,15 @@
 
 namespace Modules\Invoice\Models;
 
+use Dimsav\Translatable\Translatable;
 use Illuminate\Database\Eloquent\Model;
+use Modules\Admin\Traits\SyncTranslations;
+use Modules\Invoice\Translations\InvoiceItemTranslation;
 
 class InvoiceItem extends Model
 {
+    use SyncTranslations, Translatable;
+
     /**
      * Table name.
      *
@@ -25,31 +30,56 @@ class InvoiceItem extends Model
     ];
 
     /**
-     * Enable timestamps.
+     * Disable timestamps.
      *
      * @var bool
      */
-    public $timestamps = true;
+    public $timestamps = false;
+
+    /**
+     * Translation model.
+     *
+     * @var string
+     */
+    public $translationModel = InvoiceItemTranslation::class;
+
+    /**
+     * Attributes that are translatable.
+     *
+     * @var array
+     */
+    public $translatedAttributes = [
+        'name',
+    ];
+
+    /**
+     * Eager-load relations.
+     *
+     * @var array
+     */
+    protected $with = ['translations'];
 
     /** -------------------- Relations -------------------- */
 
     /**
-     * Invoice has many items
+     * Invoice item belongs to invoice
      *
-     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
      */
-    public function items()
+    public function invoice()
     {
-        return $this->hasMany(InvoiceItem::class);
+        return $this->belongsTo(Invoice::class, 'invoice_id');
     }
 
+    /** -------------------- Accessors -------------------- */
+
     /**
-     * Invoice has many details
+     * Get the total : price with vat multiplied by quantity
      *
-     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     * @return float
      */
-    public function details()
+    public function getTotalAttribute(): float
     {
-        return $this->hasMany(InvoiceDetail::class);
+        return (float)number_format($this->price_with_vat * $this->quantity, 2, '.', '');
     }
 }

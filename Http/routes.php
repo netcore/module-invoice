@@ -14,10 +14,25 @@ Route::group($groupParams, function () {
         'as'   => 'index',
     ]);
 
-    Route::get('/t', function() {
-        invoice()->make(
+    Route::get('/make', function () {
+        return invoice()->setItems([
+            [
+                'price' => 199.21,
+                'name'  => 'Test item 1',
+            ],
+            [
+                'price' => 958.36,
+                'name'  => 'Test item 2',
+            ],
+        ])->forUser(auth()->user())->make();
+    });
 
-        );
+    Route::get('/t', function () {
+        app()->setLocale('en');
+
+        $invoice = \Modules\Invoice\Models\Invoice::first();
+
+        return $invoice->getPDF()->stream();
     });
 
 });

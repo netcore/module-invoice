@@ -2,10 +2,7 @@
 
 @section('content')
 
-    <ol class="breadcrumb page-breadcrumb">
-        <li><a href="{{ route('admin::dashboard.index') }}">Admin</a></li>
-        <li class="active">Invoices</li>
-    </ol>
+    {!! Breadcrumbs::render('admin.invoice') !!}
 
     <div class="panel panel-default">
         <div class="panel-heading">Invoices &nbsp; <span class="label label-info">0</span></div>
@@ -18,17 +15,29 @@
             >
                 <thead>
                 <tr>
-                    <th>#</th>
+                    <th>Invoice nr.</th>
                     <th>Date</th>
                     <th>User</th>
-                    <th>Payment method</th>
-                    <th>Total sum</th>
+                    <th>Total w/ VAT</th>
+                    <th>Total w/o VAT</th>
                     <th>Actions</th>
                 </tr>
                 </thead>
             </table>
         </div>
     </div>
+
+    @php
+
+        //$invoice = invoice()->forUser(auth()->user());
+
+        dd(
+            \Modules\Invoice\Models\Invoice::first()->getPDF()
+        );
+
+        //dd($invoice);
+
+    @endphp
 
 @endsection
 
