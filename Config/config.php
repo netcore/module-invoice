@@ -1,7 +1,7 @@
 <?php
 
 return [
-    'name' => 'Invoice',
+    'name'                  => 'Invoice',
 
     /**
      * Define invoice relations
@@ -9,7 +9,7 @@ return [
      * If user/order relation is enabled, user_id/order field will be created
      * !!! Important: You should configure this before running migrations !!!
      */
-    'relations' => [
+    'relations'             => [
         [
             'name'       => 'user',
             'type'       => 'belongsTo',
@@ -17,6 +17,17 @@ return [
             'ownerKey'   => 'id',
             'enabled'    => false,
             'class'      => \App\User::class,
+
+            'table' => [
+                'show' => true,
+                'name' => 'User',
+
+                'searchable' => true,
+                'sortable'   => true,
+                'd_data'     => 'user',
+                'd_name'     => 'user.first_name',
+                'modifier'   => 'fullName',
+            ],
         ],
         [
             'name'       => 'order',
@@ -25,20 +36,31 @@ return [
             'ownerKey'   => 'id',
             'enabled'    => false,
             'class'      => \Modules\Order\Models\Order::class,
-        ]
+
+            'table' => [
+                'show' => true,
+                'name' => 'Order ID',
+
+                'searchable' => true,
+                'sortable'   => true,
+                'd_data'     => 'order',
+                'd_name'     => 'order.id',
+                'modifier'   => 'id',
+            ],
+        ],
     ],
 
     /**
      * PDF settings
      */
-    'pdf' => [
+    'pdf'                   => [
         'view' => 'invoice::pdf.example',
     ],
 
     /**
      * Sender data
      */
-    'sender' => [
+    'sender'                => [
         'company_name'        => 'Company Ltd.',
         'registration_number' => '0000000000000',
         'address'             => 'Country, Street No. 1',
@@ -52,15 +74,15 @@ return [
     /**
      * Zero-padded invoice nr.
      */
-    'invoice_nr_padded_by' => 6,
+    'invoice_nr_padded_by'  => 6,
 
     /**
      * Invoice nr. prefix
      */
-    'invoice_nr_prefix' => 'INV',
+    'invoice_nr_prefix'     => 'INV',
 
     /**
-     * ->setItems
+     * When creating - prices are passed with vat?
      */
-    'prices_given_with_vat' => false,
+    'prices_given_with_vat' => true,
 ];

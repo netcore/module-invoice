@@ -5,7 +5,7 @@
     {!! Breadcrumbs::render('admin.invoice') !!}
 
     <div class="panel panel-default">
-        <div class="panel-heading">Invoices &nbsp; <span class="label label-info">0</span></div>
+        <div class="panel-heading">Invoices &nbsp; <span class="label label-info">{{ invoice()->totalCount() }}</span></div>
         <div class="panel-body overflow-x-auto">
             <table
                     class="table table-bordered table-stripped"
@@ -17,9 +17,11 @@
                 <tr>
                     <th>Invoice nr.</th>
                     <th>Date</th>
-                    <th>User</th>
-                    <th>Total w/ VAT</th>
-                    <th>Total w/o VAT</th>
+                    @foreach($relations as $relation)
+                        <th>{{ $relation['table']['name'] }}</th>
+                    @endforeach
+                    <th>Total without VAT</th>
+                    <th>Total with VAT</th>
                     <th>Actions</th>
                 </tr>
                 </thead>
@@ -36,5 +38,8 @@
 @endsection
 
 @section('scripts')
+    <script type="text/javascript">
+        var enabledRelations = {!! json_encode($relations) !!};
+    </script>
     <script src="{{ versionedAsset('assets/invoice/admin/js/index.js') }}"></script>
 @endsection

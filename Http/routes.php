@@ -17,14 +17,4 @@ Route::group([
         'as'   => 'datatable-pagination'
     ]);
 
-    Route::get('/make', function() {
-        invoice()->forUser(auth()->user())->make();
-    });
-
-    Route::get('/test', function() {
-        $i = \Modules\Invoice\Models\Invoice::first();
-
-        dd($i->user()->first());
-    });
-
 });

@@ -7,6 +7,33 @@ use Illuminate\Database\Eloquent\Model;
 use Modules\Admin\Traits\SyncTranslations;
 use Modules\Invoice\Translations\InvoiceItemTranslation;
 
+/**
+ * Modules\Invoice\Models\InvoiceItem
+ *
+ * @property int $id
+ * @property int $invoice_id
+ * @property float $price_with_vat
+ * @property float $price_without_vat
+ * @property int $quantity
+ * @property-read float $total
+ * @property-read \Modules\Invoice\Models\Invoice $invoice
+ * @property-read \Illuminate\Database\Eloquent\Collection|\Modules\Invoice\Translations\InvoiceItemTranslation[] $translations
+ * @method static \Illuminate\Database\Eloquent\Builder|\Modules\Invoice\Models\InvoiceItem listsTranslations($translationField)
+ * @method static \Illuminate\Database\Eloquent\Builder|\Modules\Invoice\Models\InvoiceItem notTranslatedIn($locale = null)
+ * @method static \Illuminate\Database\Eloquent\Builder|\Modules\Invoice\Models\InvoiceItem orWhereTranslation($key, $value, $locale = null)
+ * @method static \Illuminate\Database\Eloquent\Builder|\Modules\Invoice\Models\InvoiceItem orWhereTranslationLike($key, $value, $locale = null)
+ * @method static \Illuminate\Database\Eloquent\Builder|\Modules\Invoice\Models\InvoiceItem translated()
+ * @method static \Illuminate\Database\Eloquent\Builder|\Modules\Invoice\Models\InvoiceItem translatedIn($locale = null)
+ * @method static \Illuminate\Database\Eloquent\Builder|\Modules\Invoice\Models\InvoiceItem whereId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\Modules\Invoice\Models\InvoiceItem whereInvoiceId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\Modules\Invoice\Models\InvoiceItem wherePriceWithVat($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\Modules\Invoice\Models\InvoiceItem wherePriceWithoutVat($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\Modules\Invoice\Models\InvoiceItem whereQuantity($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\Modules\Invoice\Models\InvoiceItem whereTranslation($key, $value, $locale = null)
+ * @method static \Illuminate\Database\Eloquent\Builder|\Modules\Invoice\Models\InvoiceItem whereTranslationLike($key, $value, $locale = null)
+ * @method static \Illuminate\Database\Eloquent\Builder|\Modules\Invoice\Models\InvoiceItem withTranslation()
+ * @mixin \Eloquent
+ */
 class InvoiceItem extends Model
 {
     use SyncTranslations, Translatable;
@@ -59,6 +86,22 @@ class InvoiceItem extends Model
      */
     protected $with = ['translations'];
 
+    /**
+     * Register model events
+     */
+    public static function boot()
+    {
+        static::created(function(InvoiceItem $item) {
+            $item->invoice->updateTotalSum();
+        });
+
+        static::updated(function(InvoiceItem $item) {
+            $item->invoice->updateTotalSum();
+        });
+
+        parent::boot();
+    }
+
     /** -------------------- Relations -------------------- */
 
     /**
@@ -74,12 +117,22 @@ class InvoiceItem extends Model
     /** -------------------- Accessors -------------------- */
 
     /**
-     * Get the total : price with vat multiplied by quantity
+     * Get the total with vat : price with vat multiplied by quantity
      *
      * @return float
      */
-    public function getTotalAttribute(): float
+    public function getTotalWithVatAttribute(): float
     {
         return (float)number_format($this->price_with_vat * $this->quantity, 2, '.', '');
+    }
+
+    /**
+     * Get the total with vat : price with vat multiplied by quantity
+     *
+     * @return float
+     */
+    public function getTotalWithoutVatAttribute(): float
+    {
+        return (float)number_format($this->price_without_vat * $this->quantity, 2, '.', '');
     }
 }

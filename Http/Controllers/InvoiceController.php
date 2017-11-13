@@ -16,6 +16,9 @@ class InvoiceController extends Controller
      */
     public function index()
     {
-        return view('invoice::admin.index');
+        $relations = config('netcore.module-invoice.relations');
+        $relations = collect($relations)->where('enabled', true)->where('table.show', true);
+
+        return view('invoice::admin.index', compact('relations'));
     }
 }

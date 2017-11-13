@@ -12,47 +12,53 @@ use Netcore\Translator\Helpers\TransHelper;
 class InvoiceRepository
 {
     /**
-     * VAT amount
+     * Enabled Invoice model relations.
+     *
+     * @var array
+     */
+    protected $enabledInvoiceRelations = [];
+
+    /**
+     * VAT amount.
      *
      * @var int
      */
     protected $vat;
 
     /**
-     * Sender data
+     * Sender data.
      *
      * @var array
      */
     protected $senderData = [];
 
     /**
-     * Receiver data
+     * Receiver data.
      *
      * @var array
      */
     protected $receiverData = [];
 
     /**
-     * Invoice items
+     * Invoice items.
      *
      * @var Collection
      */
     protected $items;
 
     /**
-     * @var int|null
-     */
-    protected $user_id;
-
-    /**
-     * @var int|null
-     */
-    protected $order_id;
-
-    /**
+     * Invoice number.
+     *
      * @var string
      */
     protected $invoice_nr;
+
+    /**
+     * Associated relations.
+     *
+     * @var array
+     */
+    protected $associatedRelations = [];
 
     /**
      * InvoiceRepository constructor.
@@ -62,20 +68,28 @@ class InvoiceRepository
         $this->vat = config('netcore.module-invoice.vat', 21);
         $this->senderData = config('netcore.module-invoice.sender', []);
 
+        $this->enabledInvoiceRelations = collect(
+            config('netcore.module-invoice.relations')
+        )->where('enabled', true)->keyBy('name');
+
         $this->items = collect();
     }
 
     /**
-     * Set order id
+     * Set relations fields - user_id/order_id etc.
      *
+     * @param string $relationName
      * @param int $id
-     * @return $this
      */
-    public function setOrderId(int $id)
+    public function associateWithRelation(string $relationName, int $id)
     {
-        $this->order_id = $id;
+        $relation = array_get($this->enabledInvoiceRelations, $relationName);
 
-        return $this;
+        if (! $relation) {
+            return;
+        }
+
+        $this->associatedRelations[array_get($relation, 'foreignKey')] = $id;
     }
 
     /**
@@ -89,7 +103,7 @@ class InvoiceRepository
     }
 
     /**
-     * Override VAT amount
+     * Override VAT amount.
      *
      * @param int $vat
      * @return $this
@@ -102,7 +116,7 @@ class InvoiceRepository
     }
 
     /**
-     * Set invoice items
+     * Set invoice items.
      *
      * @param array $items
      * @return $this
@@ -115,7 +129,7 @@ class InvoiceRepository
     }
 
     /**
-     * Override sender data
+     * Override sender data.
      *
      * @param array $data
      * @return $this
@@ -128,7 +142,7 @@ class InvoiceRepository
     }
 
     /**
-     * Override receiver data
+     * Override receiver data.
      *
      * @param array $data
      * @return $this
@@ -141,7 +155,7 @@ class InvoiceRepository
     }
 
     /**
-     * Merge receiver data
+     * Merge receiver data.
      *
      * @param array $data
      * @return $this
@@ -162,6 +176,10 @@ class InvoiceRepository
      */
     public function forUser(Authenticatable $authenticatable)
     {
+        if (!$this->hasEnabledRelation('user')) {
+            throw new InvoiceBaseException('User relation is not enabled.');
+        }
+
         if (!method_exists($authenticatable, 'getInvoiceReceiverData')) {
             throw new InvoiceBaseException('Method [getInvoiceReceiverData] does not exist in ' . get_class($authenticatable) . ' class.');
         }
@@ -173,7 +191,8 @@ class InvoiceRepository
         }
 
         $this->receiverData = array_merge($this->receiverData, $dataFromUser);
-        $this->user_id = object_get($authenticatable, 'id');
+
+        $this->associateWithRelation('user', object_get($authenticatable, 'id'));
 
         return $this;
     }
@@ -186,7 +205,7 @@ class InvoiceRepository
     public function make(): Invoice
     {
         // Generate invoice nr. from id
-        if (! $this->invoice_nr) {
+        if (!$this->invoice_nr) {
             $lastOrder = Invoice::orderBy('id', 'desc')->first();
             $lastOrderId = object_get($lastOrder, 'id', 0);
 
@@ -203,28 +222,22 @@ class InvoiceRepository
         $vatPercent = $this->vat * 0.01; // 0.21
         $vatPercentFull = 1 + $vatPercent; // 1.21
 
-        // Count total sum of items
-        $totalSum = $this->items->sum('price');
-
-        // Calculate prices with and without VAT
-        if ($pricesGivenWithVat) {
-            $totalWithVat = $totalSum;
-            $totalWithoutVat = $totalSum - ($totalSum / $vatPercentFull);
-        } else {
-            $totalWithVat = $totalSum * $vatPercentFull;
-            $totalWithoutVat = $totalSum;
-        }
-
-        $invoice = Invoice::create([
-            'user_id'           => $this->user_id,
-            //'order_id'          => $this->order_id,
+        $invoiceData = [
             'invoice_nr'        => $this->invoice_nr,
-            'total_with_vat'    => $totalWithVat,
-            'total_without_vat' => $totalWithoutVat,
+            'total_with_vat'    => 0,
+            'total_without_vat' => 0,
             'vat'               => $this->vat,
             'sender_data'       => $this->senderData,
             'receiver_data'     => $this->receiverData,
-        ]);
+        ];
+
+        dd(
+            array_merge($invoiceData, $this->associatedRelations)
+        );
+
+        $invoice = Invoice::create(
+            array_merge($invoiceData, $this->associatedRelations)
+        );
 
         foreach ($this->items as $itemData) {
             $price = (float)array_get($itemData, 'price', 0);
@@ -245,6 +258,7 @@ class InvoiceRepository
 
             $translations = [];
 
+            // Same name given for all languages
             if ($name = array_get($itemData, 'name')) {
                 foreach (TransHelper::getAllLanguages() as $language) {
                     $translations[$language->iso_code] = ['name' => $name];
@@ -276,5 +290,15 @@ class InvoiceRepository
         }
 
         return array_get($relationsCollection->where('name', $name)->first(), 'enabled');
+    }
+
+    /**
+     * Get the total invoices count.
+     *
+     * @return int
+     */
+    public function totalCount()
+    {
+        return Invoice::count();
     }
 }

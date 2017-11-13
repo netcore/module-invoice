@@ -9,8 +9,34 @@ trait InvoiceDatatableTrait
 {
     public function datatablePagination()
     {
-        $invoices = Invoice::query();
+        $relations = config('netcore.module-invoice.relations', []);
+        $relations = collect($relations)->where('enabled', true);
 
-        return DataTables::of($invoices)->make(true);
+        $datatable = DataTables::of(
+            Invoice::query()
+        );
+
+        // Modify relation display format
+        foreach ($relations as $relation) {
+            $table = array_get($relation, 'table');
+
+            if (!$table || !$table['show']) {
+                continue;
+            }
+
+            $datatable->editColumn($relation['name'], function($row) use($table, $relation) {
+                return $row->{$relation['name']}->{$table['modifier']};
+            });
+        }
+
+        $datatable->addColumn('actions', function ($row) {
+            return view('invoice::admin._actions', compact('row'))->render();
+        });
+
+        $datatable->rawColumns([
+            'actions',
+        ]);
+
+        return $datatable->make(true);
     }
 }

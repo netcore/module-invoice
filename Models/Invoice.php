@@ -8,6 +8,41 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 use Modules\Invoice\Exceptions\InvoiceBaseException;
 use PDF;
 
+/**
+ * Modules\Invoice\Models\Invoice
+ *
+ * @property int $id
+ * @property string|null $invoice_nr
+ * @property float $total_with_vat
+ * @property float $total_without_vat
+ * @property int|null $vat
+ * @property string|null $payment_details
+ * @property array $sender_data
+ * @property array $receiver_data
+ * @property array $data
+ * @property \Carbon\Carbon|null $created_at
+ * @property \Carbon\Carbon|null $updated_at
+ * @property string|null $deleted_at
+ * @property-read \Illuminate\Database\Eloquent\Collection|\Modules\Invoice\Models\InvoiceItem[] $items
+ * @method static bool|null forceDelete()
+ * @method static \Illuminate\Database\Query\Builder|\Modules\Invoice\Models\Invoice onlyTrashed()
+ * @method static bool|null restore()
+ * @method static \Illuminate\Database\Eloquent\Builder|\Modules\Invoice\Models\Invoice whereCreatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\Modules\Invoice\Models\Invoice whereData($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\Modules\Invoice\Models\Invoice whereDeletedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\Modules\Invoice\Models\Invoice whereId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\Modules\Invoice\Models\Invoice whereInvoiceNr($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\Modules\Invoice\Models\Invoice wherePaymentDetails($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\Modules\Invoice\Models\Invoice whereReceiverData($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\Modules\Invoice\Models\Invoice whereSenderData($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\Modules\Invoice\Models\Invoice whereTotalWithVat($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\Modules\Invoice\Models\Invoice whereTotalWithoutVat($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\Modules\Invoice\Models\Invoice whereUpdatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\Modules\Invoice\Models\Invoice whereVat($value)
+ * @method static \Illuminate\Database\Query\Builder|\Modules\Invoice\Models\Invoice withTrashed()
+ * @method static \Illuminate\Database\Query\Builder|\Modules\Invoice\Models\Invoice withoutTrashed()
+ * @mixin \Eloquent
+ */
 class Invoice extends Model
 {
     use SoftDeletes;
@@ -56,6 +91,28 @@ class Invoice extends Model
     ];
 
     /**
+     * Invoice constructor.
+     *
+     * @param array $attributes
+     */
+    public function __construct(array $attributes = [])
+    {
+        static $relations;
+
+        if (!$relations) {
+            $relations = config('netcore.module-invoice.relations');
+            $relations = collect($relations)->where('enabled', true);
+        }
+
+        // Eager load registered relations
+        $relations->each(function ($relation) {
+            $this->with[] = $relation['name'];
+        });
+
+        parent::__construct($attributes);
+    }
+
+    /**
      * Dynamic method call.
      *
      * @param string $method
@@ -66,9 +123,9 @@ class Invoice extends Model
     {
         static $relations;
 
-        if (! $relations) {
-            $relations = collect(config('netcore.module-invoice.relations'))->where('enabled', true);
-            $this->load($relations->pluck('name')->toArray());
+        if (!$relations) {
+            $relations = config('netcore.module-invoice.relations');
+            $relations = collect($relations)->where('enabled', true);
         }
 
         if ($relation = $relations->where('name', $method)->first()) {
@@ -95,10 +152,10 @@ class Invoice extends Model
     /**
      * Get PDF wrapper
      *
-     * @return PdfWrapper
+     * @return PdfWrapper|PDF
      * @throws InvoiceBaseException
      */
-    public function getPDF(): PdfWrapper
+    public function getPDF()
     {
         $view = config('netcore.module-invoice.pdf.view');
 
@@ -143,5 +200,18 @@ class Invoice extends Model
     public function getReceiverParam(string $key, $fallback = '')
     {
         return array_get($this->receiver_data, $key, $fallback);
+    }
+
+    /**
+     * Update invoice total sum
+     *
+     * @return void
+     */
+    public function updateTotalSum(): void
+    {
+        $this->update([
+            'total_without_vat' => $this->items->sum('price_without_vat'),
+            'total_with_vat'    => $this->items->sum('price_with_vat'),
+        ]);
     }
 }
