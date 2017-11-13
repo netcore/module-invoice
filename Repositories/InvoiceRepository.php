@@ -205,6 +205,19 @@ class InvoiceRepository
     }
 
     /**
+     * Set payment details field.
+     *
+     * @param string $details
+     * @return $this
+     */
+    public function setPaymentDetail(string $details)
+    {
+        $this->paymentDetails = $details;
+
+        return $this;
+    }
+
+    /**
      * Create invoice
      *
      * @return Invoice
