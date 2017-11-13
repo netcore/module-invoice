@@ -51,7 +51,14 @@ class InvoiceRepository
      *
      * @var string
      */
-    protected $invoice_nr;
+    protected $invoiceNr;
+
+    /**
+     * Payment details.
+     *
+     * @var string
+     */
+    protected $paymentDetails;
 
     /**
      * Associated relations.
@@ -95,11 +102,11 @@ class InvoiceRepository
     /**
      * Override invoice nr.
      *
-     * @param string $invoice_nr
+     * @param string $invoiceNr
      */
-    public function setInvoiceNr(string $invoice_nr)
+    public function setInvoiceNr(string $invoiceNr)
     {
-        $this->invoice_nr = $invoice_nr;
+        $this->invoiceNr = $invoiceNr;
     }
 
     /**
@@ -205,7 +212,7 @@ class InvoiceRepository
     public function make(): Invoice
     {
         // Generate invoice nr. from id
-        if (!$this->invoice_nr) {
+        if (!$this->invoiceNr) {
             $lastOrder = Invoice::orderBy('id', 'desc')->first();
             $lastOrderId = object_get($lastOrder, 'id', 0);
 
@@ -215,7 +222,7 @@ class InvoiceRepository
             $padBy = (int)config('netcore.module-invoice.invoice_nr_padded_by', 6);
             $paddedId = str_pad($nextId, $padBy, '0', STR_PAD_LEFT);
 
-            $this->invoice_nr = $invoiceNrPrefix . $paddedId;
+            $this->invoiceNr = $invoiceNrPrefix . $paddedId;
         }
 
         $pricesGivenWithVat = config('netcore.module-invoice.prices_given_with_vat', true);
@@ -223,17 +230,14 @@ class InvoiceRepository
         $vatPercentFull = 1 + $vatPercent; // 1.21
 
         $invoiceData = [
-            'invoice_nr'        => $this->invoice_nr,
+            'invoice_nr'        => $this->invoiceNr,
             'total_with_vat'    => 0,
             'total_without_vat' => 0,
             'vat'               => $this->vat,
             'sender_data'       => $this->senderData,
             'receiver_data'     => $this->receiverData,
+            'payment_details'   => $this->paymentDetails,
         ];
-
-        dd(
-            array_merge($invoiceData, $this->associatedRelations)
-        );
 
         $invoice = Invoice::create(
             array_merge($invoiceData, $this->associatedRelations)
