@@ -35,10 +35,15 @@ class InvoiceServiceProvider extends ServiceProvider
      */
     public function register()
     {
-        // Register providers
         $this->app->register(\Barryvdh\Snappy\ServiceProvider::class);
+        $this->registerAliases();
+    }
 
-        // Register facades
+    /**
+     * Register aliases.
+     */
+    public function registerAliases()
+    {
         AliasLoader::getInstance()->alias('PDF', \Barryvdh\Snappy\Facades\SnappyPdf::class);
     }
 
@@ -67,7 +72,6 @@ class InvoiceServiceProvider extends ServiceProvider
     public function registerViews()
     {
         $viewPath = resource_path('views/modules/invoice');
-
         $sourcePath = __DIR__ . '/../Resources/views';
 
         $this->publishes([
@@ -76,7 +80,7 @@ class InvoiceServiceProvider extends ServiceProvider
 
         $this->loadViewsFrom(array_merge(array_map(function ($path) {
             return $path . '/modules/invoice';
-        }, \Config::get('view.paths')), [$sourcePath]), 'invoice');
+        }, config('view.paths')), [$sourcePath]), 'invoice');
     }
 
     /**

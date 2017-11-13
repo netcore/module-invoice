@@ -30,6 +30,7 @@ class Invoice extends Model
         'invoice_nr',
         'total_with_vat',
         'total_without_vat',
+        'payment_method',
         'sender_data',
         'receiver_data',
         'data',
@@ -54,6 +55,29 @@ class Invoice extends Model
         'data'          => 'array',
     ];
 
+    /**
+     * Dynamic method call.
+     *
+     * @param string $method
+     * @param array $parameters
+     * @return mixed
+     */
+    public function __call($method, $parameters)
+    {
+        static $relations;
+
+        if (! $relations) {
+            $relations = collect(config('netcore.module-invoice.relations'))->where('enabled', true);
+            $this->load($relations->pluck('name')->toArray());
+        }
+
+        if ($relation = $relations->where('name', $method)->first()) {
+            return $this->{$relation['type']}($relation['class'], $relation['foreignKey'], $relation['ownerKey']);
+        }
+
+        return parent::__call($method, $parameters);
+    }
+
     /** -------------------- Relations -------------------- */
 
     /**
@@ -74,11 +98,11 @@ class Invoice extends Model
      * @return PdfWrapper
      * @throws InvoiceBaseException
      */
-    public function getPDF() : PdfWrapper
+    public function getPDF(): PdfWrapper
     {
         $view = config('netcore.module-invoice.pdf.view');
 
-        if (! $view || ! view()->exists($view)) {
+        if (!$view || !view()->exists($view)) {
             throw new InvoiceBaseException('PDF view is not set.');
         }
 

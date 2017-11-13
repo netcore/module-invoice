@@ -62,18 +62,6 @@ class InvoiceRepository
         $this->vat = config('netcore.module-invoice.vat', 21);
         $this->senderData = config('netcore.module-invoice.sender', []);
 
-        // Generate invoice nr. from id
-        $lastOrder = Invoice::orderBy('id', 'desc')->first();
-        $lastOrderId = object_get($lastOrder, 'id', 0);
-
-        $nextId = $lastOrderId + 1;
-
-        $invoiceNrPrefix = config('netcore.module-invoice.invoice_nr_prefix', 'INV');
-        $padBy = (int)config('netcore.module-invoice.invoice_nr_padded_by', 6);
-        $paddedId = str_pad($nextId, $padBy, '0', STR_PAD_LEFT);
-
-        $this->invoice_nr = $invoiceNrPrefix . $paddedId;
-
         $this->items = collect();
     }
 
@@ -197,6 +185,20 @@ class InvoiceRepository
      */
     public function make(): Invoice
     {
+        // Generate invoice nr. from id
+        if (! $this->invoice_nr) {
+            $lastOrder = Invoice::orderBy('id', 'desc')->first();
+            $lastOrderId = object_get($lastOrder, 'id', 0);
+
+            $nextId = $lastOrderId + 1;
+
+            $invoiceNrPrefix = config('netcore.module-invoice.invoice_nr_prefix', 'INV');
+            $padBy = (int)config('netcore.module-invoice.invoice_nr_padded_by', 6);
+            $paddedId = str_pad($nextId, $padBy, '0', STR_PAD_LEFT);
+
+            $this->invoice_nr = $invoiceNrPrefix . $paddedId;
+        }
+
         $pricesGivenWithVat = config('netcore.module-invoice.prices_given_with_vat', true);
         $vatPercent = $this->vat * 0.01; // 0.21
         $vatPercentFull = 1 + $vatPercent; // 1.21
@@ -215,7 +217,7 @@ class InvoiceRepository
 
         $invoice = Invoice::create([
             'user_id'           => $this->user_id,
-            'order_id'          => $this->order_id,
+            //'order_id'          => $this->order_id,
             'invoice_nr'        => $this->invoice_nr,
             'total_with_vat'    => $totalWithVat,
             'total_without_vat' => $totalWithoutVat,
@@ -255,5 +257,24 @@ class InvoiceRepository
         }
 
         return $invoice;
+    }
+
+    /**
+     * Check if relation is enabled
+     *
+     * @param string $name
+     * @return bool
+     */
+    public function hasEnabledRelation(string $name): bool
+    {
+        static $relationsCollection;
+
+        if (!$relationsCollection) {
+            $relationsCollection = collect(
+                (array)config('netcore.module-invoice.relations', [])
+            );
+        }
+
+        return array_get($relationsCollection->where('name', $name)->first(), 'enabled');
     }
 }

@@ -11,7 +11,7 @@
                     class="table table-bordered table-stripped"
                     id="invoices-datatable"
                     data-caption="Invoices"
-                    data-ajax="/"
+                    data-ajax="{{ route('invoice::datatable-pagination') }}"
             >
                 <thead>
                 <tr>
@@ -26,18 +26,6 @@
             </table>
         </div>
     </div>
-
-    @php
-
-        //$invoice = invoice()->forUser(auth()->user());
-
-        dd(
-            \Modules\Invoice\Models\Invoice::first()->getPDF()
-        );
-
-        //dd($invoice);
-
-    @endphp
 
 @endsection
 
