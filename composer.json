@@ -1,6 +1,6 @@
 {
-    "name": "netcore/invoice",
-    "description": "Module for invoices.",
+    "name": "netcore/module-invoice",
+    "description": "Module for generating invoices.",
     "type": "module",
     "homepage": "http://netcore.lv",
     "license": "MIT",
