@@ -17,4 +17,9 @@ Route::group([
         'as'   => 'datatable-pagination'
     ]);
 
+    Route::get('/{invoice}', [
+        'uses' => 'InvoiceController@show',
+        'as'   => 'show'
+    ]);
+
 });

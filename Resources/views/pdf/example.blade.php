@@ -12,6 +12,7 @@
     </style>
     <link rel="stylesheet" href="{{ asset('assets/invoice/pdf/bootstrap.min.css') }}" />
     <link rel="stylesheet" href="{{ asset('assets/invoice/pdf/example-invoice.css') }}" />
+    <title>{{ $invoice->invoice_nr }}</title>
 </head>
 <body>
 

@@ -3,6 +3,7 @@
 namespace Modules\Invoice\Http\Controllers;
 
 use Illuminate\Routing\Controller;
+use Modules\Invoice\Models\Invoice;
 use Modules\Invoice\Traits\InvoiceDatatableTrait;
 
 class InvoiceController extends Controller
@@ -20,5 +21,21 @@ class InvoiceController extends Controller
         $relations = collect($relations)->where('enabled', true)->where('table.show', true);
 
         return view('invoice::admin.index', compact('relations'));
+    }
+
+    /**
+     * Show/download invoice
+     *
+     * @param Invoice $invoice
+     * @return \Illuminate\Http\Response|\Symfony\Component\HttpFoundation\StreamedResponse
+     */
+    public function show(Invoice $invoice)
+    {
+        $isDownload = request()->has('download');
+
+        $pdf = $invoice->getPDF();
+        $filename = $invoice->invoice_nr . '.pdf';
+
+        return $isDownload ? $pdf->download($filename) : $pdf->inline($filename);
     }
 }
