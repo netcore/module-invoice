@@ -92,7 +92,7 @@ class InvoiceRepository
     {
         $relation = array_get($this->enabledInvoiceRelations, $relationName);
 
-        if (! $relation) {
+        if (!$relation) {
             return;
         }
 
@@ -262,15 +262,19 @@ class InvoiceRepository
             // Calculate price with and without VAT
             if ($pricesGivenWithVat) {
                 $priceWithVat = $price;
-                $priceWithoutVat = $price - ($price / $vatPercentFull);
+                $priceWithoutVat = $price / $vatPercentFull;
             } else {
                 $priceWithVat = $price * $vatPercentFull;
                 $priceWithoutVat = $price;
             }
 
+            $priceWithoutVat = round($priceWithoutVat, 2);
+            $priceWithVat = round($priceWithVat, 2);
+
             $item = $invoice->items()->create([
                 'price_with_vat'    => $priceWithVat,
                 'price_without_vat' => $priceWithoutVat,
+                'quantity'          => array_get($itemData, 'quantity', 1),
             ]);
 
             $translations = [];
