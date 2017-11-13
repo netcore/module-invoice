@@ -210,7 +210,7 @@ class InvoiceRepository
      * @param string $details
      * @return $this
      */
-    public function setPaymentDetail(string $details)
+    public function setPaymentDetails(string $details)
     {
         $this->paymentDetails = $details;
 
