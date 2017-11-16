@@ -5,6 +5,7 @@ namespace Modules\Invoice\Database\Seeders;
 use Illuminate\Database\Seeder;
 use Illuminate\Database\Eloquent\Model;
 use Modules\Admin\Models\Menu;
+use Netcore\Translator\Helpers\TransHelper;
 
 class InvoiceDatabaseSeeder extends Seeder
 {
@@ -32,6 +33,7 @@ class InvoiceDatabaseSeeder extends Seeder
                     'name'            => 'Invoices',
                     'icon'            => 'fa-file-pdf-o',
                     'type'            => 'route',
+                    'is_active'       => 1,
                     'value'           => 'invoice::index',
                     'active_resolver' => 'invoice::*',
                     'module'          => 'Invoice',
@@ -46,10 +48,17 @@ class InvoiceDatabaseSeeder extends Seeder
             ]);
 
             foreach ($items as $item) {
-                $itemModel = $menu->items()->firstOrCreate($item);
+                $row = $menu->items()->firstOrCreate(array_except($item, ['name', 'value', 'parameters']));
 
-                $itemModel->is_active = 1;
-                $itemModel->save();
+                $translations = [];
+                foreach (TransHelper::getAllLanguages() as $language) {
+                    $translations[$language->iso_code] = [
+                        'name'       => $item['name'],
+                        'value'      => $item['value'],
+                        'parameters' => $item['parameters']
+                    ];
+                }
+                $row->updateTranslations($translations);
             }
         }
     }
