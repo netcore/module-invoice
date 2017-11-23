@@ -7,25 +7,27 @@
     <div class="panel panel-default">
         <div class="panel-heading">Invoices &nbsp; <span class="label label-info">{{ invoice()->totalCount() }}</span></div>
         <div class="panel-body overflow-x-auto">
-            <table
-                    class="table table-bordered table-stripped"
-                    id="invoices-datatable"
-                    data-caption="Invoices"
-                    data-ajax="{{ route('invoice::datatable-pagination') }}"
-            >
-                <thead>
-                <tr>
-                    <th>Invoice nr.</th>
-                    <th>Date</th>
-                    @foreach($relations as $relation)
-                        <th>{{ $relation['table']['name'] }}</th>
-                    @endforeach
-                    <th>Total without VAT</th>
-                    <th>Total with VAT</th>
-                    <th>Actions</th>
-                </tr>
-                </thead>
-            </table>
+            <div class="table-primary">
+                <table
+                        class="table table-bordered table-stripped"
+                        id="invoices-datatable"
+                        data-caption="Invoices"
+                        data-ajax="{{ route('invoice::datatable-pagination') }}"
+                >
+                    <thead>
+                        <tr>
+                            <th>Invoice nr.</th>
+                            <th>Date</th>
+                            @foreach($relations as $relation)
+                                <th>{{ $relation['table']['name'] }}</th>
+                            @endforeach
+                            <th>Total without VAT</th>
+                            <th>Total with VAT</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                </table>
+            </div>
         </div>
     </div>
 
