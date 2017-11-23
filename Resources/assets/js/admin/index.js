@@ -23,9 +23,9 @@ init.push(() => {
         columns.push({data: 'total_with_vat', name: 'total_with_vat', orderable: true, searchable: true});
         columns.push({data: 'actions', orderable: false, searchable: false, className: 'text-right'});
 
-        table.DataTable({
+        table.dataTable({
             processing: true,
-            severSide: true,
+            serverSide: true,
             ajax: $(table).data('ajax'),
             responsive: true,
             columns: columns
