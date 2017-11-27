@@ -66,6 +66,7 @@ class Invoice extends Model
         'total_with_vat',
         'total_without_vat',
         'payment_method',
+        'payment_details',
         'sender_data',
         'receiver_data',
         'data',
