@@ -4,8 +4,11 @@ namespace Modules\Invoice\Models;
 
 use Barryvdh\Snappy\PdfWrapper;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Modules\Invoice\Exceptions\InvoiceBaseException;
+use Modules\Subscription\Models\Currency;
 use PDF;
 
 /**
@@ -46,6 +49,13 @@ use PDF;
 class Invoice extends Model
 {
     use SoftDeletes;
+
+    /**
+     * Eager-load relations.
+     *
+     * @var array
+     */
+    protected $with = ['user'];
 
     /**
      * Table name.
@@ -143,9 +153,19 @@ class Invoice extends Model
      *
      * @return \Illuminate\Database\Eloquent\Relations\HasMany
      */
-    public function items()
+    public function items(): HasMany
     {
         return $this->hasMany(InvoiceItem::class);
+    }
+
+    /**
+     * Return relation with Currency
+     *
+     * @return BelongsTo
+     */
+    public function currency(): BelongsTo
+    {
+        return $this->belongsTo(Currency::class);
     }
 
     /** -------------------- Other methods -------------------- */
@@ -214,5 +234,15 @@ class Invoice extends Model
             'total_without_vat' => $this->items->sum('price_without_vat'),
             'total_with_vat'    => $this->items->sum('price_with_vat'),
         ]);
+    }
+
+    /**
+     * Return how much VAT is
+     *
+     * @return float
+     */
+    public function getTotalVatAttribute(): float
+    {
+        return (float)number_format($this->total_with_vat - $this->total_without_vat, 2, '.', '');
     }
 }

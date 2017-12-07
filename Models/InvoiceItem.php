@@ -4,7 +4,9 @@ namespace Modules\Invoice\Models;
 
 use Dimsav\Translatable\Translatable;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Modules\Admin\Traits\SyncTranslations;
+use Modules\Invoice\Models\InvoiceItemVariable;
 use Modules\Invoice\Translations\InvoiceItemTranslation;
 
 /**
@@ -84,7 +86,7 @@ class InvoiceItem extends Model
      *
      * @var array
      */
-    protected $with = ['translations'];
+    protected $with = ['translations', 'variables'];
 
     /**
      * Register model events
@@ -114,6 +116,16 @@ class InvoiceItem extends Model
         return $this->belongsTo(Invoice::class, 'invoice_id');
     }
 
+    /**
+     * Return relation with InvoiceItemVariable
+     *
+     * @return HasMany
+     */
+    public function variables(): HasMany
+    {
+        return $this->hasMany(InvoiceItemVariable::class);
+    }
+
     /** -------------------- Accessors -------------------- */
 
     /**
@@ -135,4 +147,40 @@ class InvoiceItem extends Model
     {
         return (float)number_format($this->price_without_vat * $this->quantity, 2, '.', '');
     }
+
+    /** -------------------- Other methods -------------------- */
+
+    /**
+     * Create variables based on the passed array
+     *
+     * @param array $data
+     * @return mixed
+     */
+    public function createVariables(array $data)
+    {
+        foreach ($data as $key => $value) {
+
+            $this->variables()->create([
+                'key'       =>  $key,
+                'value'     =>  $value
+            ]);
+
+        }
+
+        return $this->variables()->getResults();
+    }
+
+    /**
+     * Return variable from variables table
+     *
+     * @param string $key
+     * @return null|string
+     */
+    public function getVariable(string $key): ?string
+    {
+        $variables = $this->variables->pluck('value', 'key');
+
+        return $variables[$key] ?? null;
+    }
+
 }
