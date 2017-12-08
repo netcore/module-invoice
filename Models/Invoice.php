@@ -55,7 +55,7 @@ class Invoice extends Model
      *
      * @var array
      */
-    protected $with = ['user'];
+    protected $with = ['user', 'currency'];
 
     /**
      * Table name.
