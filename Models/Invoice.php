@@ -71,6 +71,7 @@ class Invoice extends Model
      */
     protected $fillable = [
         'user_id',
+        'currency_id',
         'order_id',
         'invoice_nr',
         'total_with_vat',

@@ -7,6 +7,7 @@ use Illuminate\Contracts\Auth\Authenticatable;
 use Illuminate\Support\Collection;
 use Modules\Invoice\Exceptions\InvoiceBaseException;
 use Modules\Invoice\Models\Invoice;
+use Modules\Subscription\Models\Currency;
 use Netcore\Translator\Helpers\TransHelper;
 
 class InvoiceRepository
@@ -68,6 +69,13 @@ class InvoiceRepository
     protected $associatedRelations = [];
 
     /**
+     * Currency
+     *
+     * @var Currency
+     */
+    protected $currency;
+
+    /**
      * InvoiceRepository constructor.
      */
     public function __construct()
@@ -88,7 +96,8 @@ class InvoiceRepository
      * @param string $relationName
      * @param int $id
      */
-    public function associateWithRelation(string $relationName, int $id)
+    public function
+    associateWithRelation(string $relationName, int $id)
     {
         $relation = array_get($this->enabledInvoiceRelations, $relationName);
 
@@ -157,6 +166,19 @@ class InvoiceRepository
     public function setReceiver(array $data)
     {
         $this->receiverData = $data;
+
+        return $this;
+    }
+
+    /**
+     * Set currency
+     *
+     * @param Currency $currency
+     * @return InvoiceRepository
+     */
+    public function setCurrency(Currency $currency): self
+    {
+        $this->currency = $currency;
 
         return $this;
     }
@@ -243,6 +265,7 @@ class InvoiceRepository
         $vatPercentFull = 1 + $vatPercent; // 1.21
 
         $invoiceData = [
+            'currency_id'       => $this->currency->id ?? null,
             'invoice_nr'        => $this->invoiceNr,
             'total_with_vat'    => 0,
             'total_without_vat' => 0,
@@ -276,6 +299,8 @@ class InvoiceRepository
                 'price_without_vat' => $priceWithoutVat,
                 'quantity'          => array_get($itemData, 'quantity', 1),
             ]);
+
+            $item->createVariables( array_get($itemData, 'variables', []) );
 
             $translations = [];
 
