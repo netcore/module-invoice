@@ -31,9 +31,6 @@ class InvoiceController extends Controller
      */
     public function show(Invoice $invoice)
     {
-        return view(config('netcore.module-invoice.pdf.view'))->with([
-            'invoice'   =>  $invoice
-        ]);
         $isDownload = request()->has('download');
 
         $pdf = $invoice->getPDF();
