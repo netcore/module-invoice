@@ -96,16 +96,17 @@ class InvoiceRepository
      * @param string $relationName
      * @param int $id
      */
-    public function
-    associateWithRelation(string $relationName, int $id)
+    public function associateWithRelation(string $relationName, int $id)
     {
         $relation = array_get($this->enabledInvoiceRelations, $relationName);
 
         if (!$relation) {
-            return;
+            return $this;
         }
 
         $this->associatedRelations[array_get($relation, 'foreignKey')] = $id;
+
+        return $this;
     }
 
     /**
@@ -116,6 +117,8 @@ class InvoiceRepository
     public function setInvoiceNr(string $invoiceNr)
     {
         $this->invoiceNr = $invoiceNr;
+
+        return $this;
     }
 
     /**

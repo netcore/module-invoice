@@ -123,7 +123,7 @@ This module is part of Netcore CMS ecosystem and is only functional in a project
         ->setInvoiceNr('MY123') // optional - set custom invoice nr.
         ->setVat(21) // optional - overrides vat specified in config
         ->setSender([ 'name' => 'My awesome company', ... ]) // optional - overrides sender data specified in config
-        ->setReciver([ 'first_name' => ..., 'last_name' => ... ]) // optional - overrides receiver data
+        ->setReceiver([ 'first_name' => ..., 'last_name' => ... ]) // optional - overrides receiver data
         ->mergeReceiver([ 'some_additional_field' => ... ]) // optional - use if you need to add some extra receiver data
 
         ->make(); // build eveything up and returns Invoice instance
