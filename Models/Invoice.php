@@ -8,7 +8,6 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Modules\Invoice\Exceptions\InvoiceBaseException;
-use Modules\Subscription\Models\Currency;
 use PDF;
 
 /**
@@ -51,13 +50,6 @@ class Invoice extends Model
     use SoftDeletes;
 
     /**
-     * Eager-load relations.
-     *
-     * @var array
-     */
-    protected $with = ['user', 'currency'];
-
-    /**
      * Table name.
      *
      * @var string
@@ -70,9 +62,6 @@ class Invoice extends Model
      * @var array
      */
     protected $fillable = [
-        'user_id',
-        'currency_id',
-        'order_id',
         'invoice_nr',
         'total_with_vat',
         'total_without_vat',
@@ -119,6 +108,7 @@ class Invoice extends Model
         // Eager load registered relations
         $relations->each(function ($relation) {
             $this->with[] = $relation['name'];
+            $this->fillable[] = $relation['foreignKey'];
         });
 
         parent::__construct($attributes);
@@ -157,16 +147,6 @@ class Invoice extends Model
     public function items(): HasMany
     {
         return $this->hasMany(InvoiceItem::class);
-    }
-
-    /**
-     * Return relation with Currency
-     *
-     * @return BelongsTo
-     */
-    public function currency(): BelongsTo
-    {
-        return $this->belongsTo(Currency::class);
     }
 
     /** -------------------- Other methods -------------------- */
