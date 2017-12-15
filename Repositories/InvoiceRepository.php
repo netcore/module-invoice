@@ -7,7 +7,6 @@ use Illuminate\Contracts\Auth\Authenticatable;
 use Illuminate\Support\Collection;
 use Modules\Invoice\Exceptions\InvoiceBaseException;
 use Modules\Invoice\Models\Invoice;
-use Modules\Subscription\Models\Currency;
 use Netcore\Translator\Helpers\TransHelper;
 
 class InvoiceRepository
@@ -67,13 +66,6 @@ class InvoiceRepository
      * @var array
      */
     protected $associatedRelations = [];
-
-    /**
-     * Currency
-     *
-     * @var Currency
-     */
-    protected $currency;
 
     /**
      * InvoiceRepository constructor.
@@ -174,19 +166,6 @@ class InvoiceRepository
     }
 
     /**
-     * Set currency
-     *
-     * @param Currency $currency
-     * @return InvoiceRepository
-     */
-    public function setCurrency(Currency $currency): self
-    {
-        $this->currency = $currency;
-
-        return $this;
-    }
-
-    /**
      * Merge receiver data.
      *
      * @param array $data
@@ -268,7 +247,6 @@ class InvoiceRepository
         $vatPercentFull = 1 + $vatPercent; // 1.21
 
         $invoiceData = [
-            'currency_id'       => $this->currency->id ?? null,
             'invoice_nr'        => $this->invoiceNr,
             'total_with_vat'    => 0,
             'total_without_vat' => 0,
