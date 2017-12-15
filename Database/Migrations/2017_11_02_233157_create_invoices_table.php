@@ -16,8 +16,6 @@ class CreateInvoicesTable extends Migration
         Schema::create('netcore_invoice__invoices', function (Blueprint $table) {
             $table->increments('id');
 
-            $this->setRelatedFields($table);
-
             $table->string('invoice_nr')->index()->nullable();
             $table->decimal('total_with_vat', 7, 2)->default(0);
             $table->decimal('total_without_vat', 7, 2)->default(0);
@@ -31,7 +29,6 @@ class CreateInvoicesTable extends Migration
             $table->timestamps();
             $table->softDeletes();
 
-            $this->setForeignKeys($table);
         });
     }
 
@@ -45,52 +42,4 @@ class CreateInvoicesTable extends Migration
         Schema::dropIfExists('netcore_invoice__invoices');
     }
 
-    /**
-     * Set related fields.
-     *
-     * @param Blueprint $table
-     */
-    private function setRelatedFields(Blueprint &$table)
-    {
-        $relations = config('netcore.module-invoice.relations', []);
-
-        foreach ($relations as $relation) {
-            if (! array_get($relation, 'enabled')) {
-                continue;
-            }
-
-            $foreignKey = array_get($relation, 'foreignKey');
-            $table->unsignedInteger($foreignKey)->index()->nullable();
-        }
-    }
-
-    /**
-     * Set foreign keys
-     *
-     * @param Blueprint $table
-     */
-    private function setForeignKeys(Blueprint &$table)
-    {
-        $relations = config('netcore.module-invoice.relations', []);
-
-        foreach ($relations as $relation) {
-            if (!array_get($relation, 'enabled')) {
-                continue;
-            }
-
-            $foreignKey = array_get($relation, 'foreignKey');
-            $ownerKey = array_get($relation, 'ownerKey');
-
-            $className = array_get($relation, 'class');
-            $tableName = class_exists($className) ? (new $className)->getTable() : null;
-
-            $onDelete = array_get($relation, 'onDelete', 'CASCADE');
-
-            if (!$tableName || !$foreignKey || !$ownerKey) {
-                continue;
-            }
-
-            $table->foreign($foreignKey)->references($ownerKey)->on($tableName)->onDelete($onDelete);
-        }
-    }
 }
