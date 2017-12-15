@@ -119,18 +119,8 @@ class CreateInvoicesRelations extends Migration
             }
 
             $foreignKey = array_get($relation, 'foreignKey');
-            $ownerKey = array_get($relation, 'ownerKey');
 
-            $className = array_get($relation, 'class');
-            $tableName = class_exists($className) ? (new $className)->getTable() : null;
-
-            $onDelete = array_get($relation, 'onDelete', 'CASCADE');
-
-            if (!$tableName || !$foreignKey || !$ownerKey) {
-                continue;
-            }
-
-            $table->dropForeign($foreignKey);
+            $table->dropForeign([$foreignKey]);
         }
     }
 }
