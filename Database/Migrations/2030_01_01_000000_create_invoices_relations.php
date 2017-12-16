@@ -51,7 +51,7 @@ class CreateInvoicesRelations extends Migration
             }
 
             $foreignKey = array_get($relation, 'foreignKey');
-            $table->unsignedInteger($foreignKey)->index()->nullable();
+            $table->unsignedInteger($foreignKey)->index()->nullable()->after('id');
         }
     }
 
