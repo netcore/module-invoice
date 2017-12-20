@@ -1,7 +1,7 @@
 <?php
 
 return [
-    'name'                  => 'Invoice',
+    'name'      => 'Invoice',
 
     /**
      * Define invoice relations
@@ -9,7 +9,7 @@ return [
      * If user/order relation is enabled, user_id/order field will be created
      * !!! Important: You should configure this before running migrations !!!
      */
-    'relations'             => [
+    'relations' => [
         [
             'name'       => 'user',
             'type'       => 'belongsTo',
@@ -53,14 +53,14 @@ return [
     /**
      * PDF settings
      */
-    'pdf'                   => [
+    'pdf'       => [
         'view' => 'invoice::pdf.example',
     ],
 
     /**
      * Sender data
      */
-    'sender'                => [
+    'sender'    => [
         'company_name'        => 'Company Ltd.',
         'registration_number' => '0000000000000',
         'address'             => 'Country, Street No. 1',
@@ -69,6 +69,21 @@ return [
         'bank_name'           => 'Bank name',
         'bank_account'        => 'LV00BANK0000000000000',
         'email_address'       => 'support@example.com',
+    ],
+
+    'create_default_fields' => [
+        'sender'   => [
+            'company_name'    => '',
+            'company_address' => '',
+        ],
+        'receiver' => [
+            'full_name'  => '',
+            'company'    => '',
+            'vat_number' => '',
+            'address'    => '',
+            'city'       => '',
+            'zip_code'   => ''
+        ]
     ],
 
     /**

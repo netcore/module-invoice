@@ -9,6 +9,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Modules\Invoice\Exceptions\InvoiceBaseException;
 use PDF;
+use Modules\Crud\Traits\CRUDModel;
 
 /**
  * Modules\Invoice\Models\Invoice
@@ -48,6 +49,7 @@ use PDF;
 class Invoice extends Model
 {
     use SoftDeletes;
+    use CRUDModel;
 
     /**
      * Table name.

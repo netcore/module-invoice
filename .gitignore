@@ -5,3 +5,4 @@ npm-debug.log
 .env
 mix-manifest.json
 /vendor
+.idea
