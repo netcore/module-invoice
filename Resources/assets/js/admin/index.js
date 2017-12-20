@@ -28,7 +28,8 @@ init.push(() => {
             serverSide: true,
             ajax: $(table).data('ajax'),
             responsive: true,
-            columns: columns
+            columns: columns,
+            order: [[0, 'desc']]
         });
 
         table.parent().parent().find('input[type=search]').attr('placeholder', 'Search...');
