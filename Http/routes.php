@@ -3,7 +3,7 @@
 Route::group([
     'middleware' => ['web', 'auth.admin'],
     'prefix'     => 'admin/invoices',
-    'namespace'  => 'Modules\Invoice\Http\Controllers',
+    'namespace'  => '\Modules\Invoice\Http\Controllers',
     'as'         => 'invoice::',
 ], function () {
 
@@ -14,31 +14,36 @@ Route::group([
 
     Route::get('/', [
         'uses' => 'InvoiceController@index',
-        'as'   => 'x.index',
+        'as'   => 'index',
     ]);
 
     Route::get('/{invoice}', [
         'uses' => 'InvoiceController@show',
-        'as'   => 'x.show'
+        'as'   => 'show'
     ]);
 
     Route::get('/create', [
         'uses' => 'InvoiceController@create',
-        'as'   => 'x.create'
+        'as'   => 'create'
+    ]);
+
+    Route::post('/store', [
+        'uses' => 'InvoiceController@store',
+        'as'   => 'store'
     ]);
 
     Route::get('/edit/{invoice}', [
         'uses' => 'InvoiceController@edit',
-        'as'   => 'x.edit'
+        'as'   => 'edit'
     ]);
 
     Route::put('/update/{invoice}', [
         'uses' => 'InvoiceController@update',
-        'as'   => 'x.update'
+        'as'   => 'update'
     ]);
 
     Route::get('/relation/pagination', [
         'uses' => 'InvoiceController@relationPagination',
-        'as'   => 'x.relation-pagination'
+        'as'   => 'relation-pagination'
     ]);
 });

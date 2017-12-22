@@ -281,7 +281,7 @@ class InvoiceRepository
                 'quantity'          => array_get($itemData, 'quantity', 1),
             ]);
 
-            $item->createVariables( array_get($itemData, 'variables', []) );
+            $item->createVariables(array_get($itemData, 'variables', []));
 
             $translations = [];
 
@@ -327,5 +327,103 @@ class InvoiceRepository
     public function totalCount()
     {
         return Invoice::count();
+    }
+
+    public function relationPagination(String $foreignKey, String $keyword)
+    {
+
+        $relations = config('netcore.module-invoice.relations');
+        $currentRelation = collect($relations)->where('foreignKey', $foreignKey)->first();
+
+        if (!$currentRelation) {
+            return [];
+        }
+
+        $class = array_get($currentRelation, 'class');
+        $table = app()->make($class)->getTable();
+        $ajaxSelect = array_get($currentRelation, 'ajaxSelect', []);
+        $translatable = array_get($ajaxSelect, 'translatable', []);
+        $notTranslatable = array_get($ajaxSelect, 'notTranslatable', []);
+
+        $query = app()->make($class);
+
+        /**
+         * not-translatable fields
+         */
+        if (count($notTranslatable) == 1) {
+            $firstField = array_get($notTranslatable, 0);
+            $query->where($firstField, $keyword);
+        } elseif (count($notTranslatable) > 1) {
+            $query = $query->where(function ($subq) use ($notTranslatable, $keyword) {
+                foreach ($notTranslatable as $index => $field) {
+                    if ($index == 0) {
+                        $subq->where($field, 'LIKE', '%' . $keyword . '%');
+                    } else {
+                        $subq->orWhere($field, 'LIKE', '%' . $keyword . '%');
+                    }
+                }
+            });
+        }
+
+        /**
+         * translatable fields
+         */
+        if ($translatable) {
+            $query = $query->whereHas('translations', function ($subq) use ($translatable, $keyword) {
+                foreach ($translatable as $index => $field) {
+                    if ($index == 0) {
+                        $subq->where($field, 'LIKE', '%' . $keyword . '%');
+                    } else {
+                        $subq->orWhere($field, 'LIKE', '%' . $keyword . '%');
+                    }
+                }
+            });
+        }
+
+        $items = $query->get()->map(function ($item) use ($foreignKey) {
+            return [
+                'id'   => $item->id,
+                'text' => $this->labelForRelationItem($item, $foreignKey)
+            ];
+        });
+
+        $items = [
+            'items'       => $items,
+            'total_count' => 1
+        ];
+
+        return $items;
+    }
+
+    /**
+     * @param $item
+     * @param $foreignKey
+     * @return String
+     */
+    public function labelForRelationItem($item, $foreignKey): String
+    {
+        try {
+            $relations = config('netcore.module-invoice.relations');
+            $currentRelation = collect($relations)->where('foreignKey', $foreignKey)->first();
+
+            $ajaxSelect = array_get($currentRelation, 'ajaxSelect', []);
+            $translatable = array_get($ajaxSelect, 'translatable', []);
+            $notTranslatable = array_get($ajaxSelect, 'notTranslatable', []);
+
+            $textItems = [];
+
+            foreach ($notTranslatable as $field) {
+                $textItems[] = $item->$field;
+            }
+
+            foreach ($translatable as $field) {
+                $textItems[] = $item->$field;
+            }
+
+            $result = join($textItems, ' ');
+            return $result;
+        } catch (\Throwable $e) {
+            return '';
+        }
     }
 }

@@ -2,7 +2,7 @@
     <i class="fa fa-eye"></i> View
 </a>
 
-<a href="{{ route('invoice::x.edit', $row) }}" class="btn btn-xs btn-success">
+<a href="{{ route('invoice::edit', $row) }}" class="btn btn-xs btn-success">
     <i class="fa fa-eye"></i> Edit
 </a>
 

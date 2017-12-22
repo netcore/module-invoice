@@ -1,15 +1,13 @@
-
-
 <h3>Receiver</h3>
 
 @php
     $receiverDefaultFields = config('netcore.module-invoice.create_default_fields.receiver');
-
     $receiverKeyValuePairs = $receiverDefaultFields;
-    if(isset($model)) {
+    if($model->exists) {
         $receiverKeyValuePairs = $model->receiver_data;
     }
 @endphp
+
 @foreach($receiverKeyValuePairs as $key => $value)
     <fieldset class="form-group form-group-lg {{ $errors->has('receiver_data['.$key.']') ? 'form-message-light has-error has-validation-error' : '' }}">
         <label>
@@ -30,4 +28,3 @@
         @endif
     </fieldset>
 @endforeach
-

@@ -5,6 +5,7 @@ namespace Modules\Invoice\Providers;
 use Illuminate\Foundation\AliasLoader;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Database\Eloquent\Factory;
+use Modules\Invoice\Repositories\InvoiceRepository;
 
 class InvoiceServiceProvider extends ServiceProvider
 {

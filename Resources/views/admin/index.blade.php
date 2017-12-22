@@ -5,7 +5,14 @@
     {!! Breadcrumbs::render('admin.invoice') !!}
 
     <div class="panel panel-default">
-        <div class="panel-heading">Invoices &nbsp; <span class="label label-info">{{ invoice()->totalCount() }}</span></div>
+        <div class="panel-heading">
+            Invoices &nbsp; <span class="label label-info">{{ invoice()->totalCount() }}</span>
+            <div class="pull-right">
+                <a href="{{ route('invoice::create') }}" class="btn btn-xs btn-success">
+                    <i class="fa fa-plus-circle"></i> Create
+                </a>
+            </div>
+        </div>
         <div class="panel-body overflow-x-auto">
             <div class="table-primary">
                 <table

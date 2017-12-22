@@ -4,10 +4,12 @@ namespace Modules\Invoice\Http\Controllers;
 
 use Illuminate\Routing\Controller;
 use Modules\Invoice\Models\Invoice;
+use Modules\Invoice\Repositories\InvoiceRepository;
 use Modules\Invoice\Traits\InvoiceDatatableTrait;
 
 class InvoiceController extends Controller
 {
+
     use InvoiceDatatableTrait;
 
     /**
@@ -40,18 +42,51 @@ class InvoiceController extends Controller
     }
 
     /**
+     * @return mixed
+     */
+    public function create()
+    {
+        return view('invoice::admin.create', [
+            'model'  => new Invoice(),
+            'config' => []
+        ]);
+    }
+
+    /**
+     * @return mixed
+     */
+    public function store()
+    {
+        $requestData = request()->all();
+
+        $invoice = new Invoice();
+        $invoice->storage()->update($requestData);
+
+        return redirect()->back()->withSuccess('Invoice saved!');
+    }
+
+    /**
      * @param Invoice $invoice
      * @return mixed
      */
     public function edit(Invoice $invoice)
     {
-        $relations = config('netcore.module-invoice.relations');
-        $relations = collect($relations)->where('enabled', true)->where('table.show', true);
-
         return view('invoice::admin.edit', [
             'model'  => $invoice,
             'config' => []
         ]);
+    }
+
+    /**
+     * @param Invoice $invoice
+     * @return mixed
+     */
+    public function update(Invoice $invoice)
+    {
+        $requestData = request()->all();
+        $invoice->storage()->update($requestData);
+
+        return redirect()->back()->withSuccess('Invoice saved!');
     }
 
     /**
@@ -64,76 +99,8 @@ class InvoiceController extends Controller
         $page = request()->get('page', 1);
         $foreignKey = request()->get('foreignKey'); // e.g. currency_id or user_id
 
-        $relations = config('netcore.module-invoice.relations');
-        $currentRelation = collect($relations)->where('foreignKey', $foreignKey)->first();
-
-        if (!$currentRelation) {
-            abort(404);
-        }
-
-        $class = array_get($currentRelation, 'class');
-        $table = app()->make($class)->getTable();
-        $ajaxSelect = array_get($currentRelation, 'ajaxSelect', []);
-        $translatable = array_get($ajaxSelect, 'translatable', []);
-        $notTranslatable = array_get($ajaxSelect, 'notTranslatable', []);
-
-        $query = app()->make($class);
-
-        /**
-         * not-translatable fields
-         */
-        if (count($notTranslatable) == 1) {
-            $firstField = array_get($notTranslatable, 0);
-            $query->where($firstField, $keyword);
-        } elseif (count($notTranslatable) > 1) {
-            $query = $query->where(function ($subq) use ($notTranslatable, $keyword) {
-                foreach ($notTranslatable as $index => $field) {
-                    if ($index == 0) {
-                        $subq->where($field, 'LIKE', '%'.$keyword.'%');
-                    } else {
-                        $subq->orWhere($field, 'LIKE', '%'.$keyword.'%');
-                    }
-                }
-            });
-        }
-
-        /**
-         * translatable fields
-         */
-        if ($translatable) {
-            $query = $query->whereHas('translations', function ($subq) use ($translatable, $keyword) {
-                foreach ($translatable as $index => $field) {
-                    if ($index == 0) {
-                        $subq->where($field, 'LIKE', '%'.$keyword.'%');
-                    } else {
-                        $subq->orWhere($field, 'LIKE', '%'.$keyword.'%');
-                    }
-                }
-            });
-        }
-
-        $items = $query->get()->map(function($item) use ($notTranslatable, $translatable) {
-
-            $textItems = [];
-
-            foreach($notTranslatable as $field) {
-                $textItems[] = $item->$field;
-            }
-
-            foreach($translatable as $field) {
-                $textItems[] = $item->$field;
-            }
-
-            return [
-                'id' => $item->id,
-                'text' => join($textItems, ' ')
-            ];
-        });
-
-        $items = [
-            'items'       => $items,
-            'total_count' => 1
-        ];
+        $repo = new InvoiceRepository();
+        $items = $repo->relationPagination($foreignKey, $keyword);
 
         return $items;
     }
