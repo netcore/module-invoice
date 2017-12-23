@@ -8,7 +8,9 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Modules\Invoice\Exceptions\InvoiceBaseException;
+use Modules\Invoice\PassThroughs\Invoice\Storage;
 use PDF;
+use Modules\Crud\Traits\CRUDModel;
 
 /**
  * Modules\Invoice\Models\Invoice
@@ -48,6 +50,7 @@ use PDF;
 class Invoice extends Model
 {
     use SoftDeletes;
+    use CRUDModel;
 
     /**
      * Table name.
@@ -149,6 +152,17 @@ class Invoice extends Model
         return $this->hasMany(InvoiceItem::class);
     }
 
+    /** -------------------- PassThrough -------------------- */
+
+    /**
+     *
+     * @return Storage
+     */
+    public function storage()
+    {
+        return new Storage($this);
+    }
+
     /** -------------------- Other methods -------------------- */
 
     /**
@@ -212,8 +226,8 @@ class Invoice extends Model
     public function updateTotalSum(): void
     {
         $this->update([
-            'total_without_vat' => $this->items->sum('price_without_vat'),
-            'total_with_vat'    => $this->items->sum('price_with_vat'),
+            'total_without_vat' => $this->items->sum('total_without_vat'),
+            'total_with_vat'    => $this->items->sum('total_with_vat'),
         ]);
     }
 
