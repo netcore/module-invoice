@@ -106,6 +106,8 @@ class Storage extends PassThrough
             $variables = array_get($frontendItem, 'variables', []);
             $backendItem->variables()->delete();
             foreach($variables as $key => $value){
+                $key = $key ?: '';
+                $value = $value ?: '';
                 $backendItem->variables()->create(compact('key', 'value'));
             }
         }
