@@ -3,6 +3,7 @@
 namespace Modules\Invoice\Http\Controllers;
 
 use Illuminate\Routing\Controller;
+use Modules\Invoice\Http\Requests\InvoiceRequest;
 use Modules\Invoice\Models\Invoice;
 use Modules\Invoice\Repositories\InvoiceRepository;
 use Modules\Invoice\Traits\InvoiceDatatableTrait;
@@ -53,16 +54,17 @@ class InvoiceController extends Controller
     }
 
     /**
+     * @param InvoiceRequest $request
      * @return mixed
      */
-    public function store()
+    public function store(InvoiceRequest $request)
     {
-        $requestData = request()->all();
+        $requestData = $request->all();
 
         $invoice = new Invoice();
-        $invoice->storage()->update($requestData);
+        $invoice = $invoice->storage()->update($requestData);
 
-        return redirect()->back()->withSuccess('Invoice saved!');
+        return redirect()->route('invoice::edit', $invoice)->withSuccess('Invoice saved!');
     }
 
     /**
@@ -79,11 +81,12 @@ class InvoiceController extends Controller
 
     /**
      * @param Invoice $invoice
+     * @param InvoiceRequest $request
      * @return mixed
      */
-    public function update(Invoice $invoice)
+    public function update(Invoice $invoice, InvoiceRequest $request)
     {
-        $requestData = request()->all();
+        $requestData = $request->all();
         $invoice->storage()->update($requestData);
 
         return redirect()->back()->withSuccess('Invoice saved!');

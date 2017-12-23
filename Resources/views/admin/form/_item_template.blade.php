@@ -40,6 +40,23 @@
         @endif
     </td>
 
+    @php
+    $configuredInvoiceItemVariables = config('netcore.module-invoice.invoice_item_variables', []);
+    @endphp
+
+    @foreach($configuredInvoiceItemVariables as $configuredVariable)
+        @php
+            $variableObject = isset($item) ? $item->variables->where('key', $configuredVariable)->first() : null;
+            $variableValue = $variableObject ? $variableObject->value : '';
+        @endphp
+        <td>
+            {{ Form::text('items['.$itemId.'][variables]['.$configuredVariable.']', $variableValue, [
+                'class' => 'form-control',
+                'autocomplete' => 'off'
+            ]) }}
+        </td>
+    @endforeach
+
     <td>
         {{ Form::number('items['.$itemId.'][price_without_vat]', $priceWithoutVat, [
             'class' => 'form-control calculations-price-without-vat',

@@ -2,6 +2,7 @@
 
 @php
 $languages = \Netcore\Translator\Helpers\TransHelper::getAllLanguages();
+$configuredInvoiceItemVariables = config('netcore.module-invoice.invoice_item_variables', []);
 @endphp
 
 <h3>Items</h3>
@@ -9,6 +10,11 @@ $languages = \Netcore\Translator\Helpers\TransHelper::getAllLanguages();
 <table id="invoice-items-table">
     <tr>
         <th>Name</th>
+        @foreach($configuredInvoiceItemVariables as $configuredVariable)
+            <th>
+                {{ ucfirst($configuredVariable) }}
+            </th>
+        @endforeach
         <th>Price without VAT</th>
         <th>Price with VAT</th>
         <th>Quantity</th>
@@ -24,6 +30,9 @@ $languages = \Netcore\Translator\Helpers\TransHelper::getAllLanguages();
         <td></td>
         <td></td>
         <td></td>
+        @foreach($configuredInvoiceItemVariables as $configuredVariable)
+        <td></td>
+        @endforeach
         <td>
             <a class="btn btn-xs btn-success full-width max-width-100" id="add-invoice-item">
                 Add item

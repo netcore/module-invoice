@@ -17,14 +17,14 @@ Route::group([
         'as'   => 'index',
     ]);
 
-    Route::get('/{invoice}', [
-        'uses' => 'InvoiceController@show',
-        'as'   => 'show'
-    ]);
-
     Route::get('/create', [
         'uses' => 'InvoiceController@create',
         'as'   => 'create'
+    ]);
+
+    Route::get('/{invoice}', [
+        'uses' => 'InvoiceController@show',
+        'as'   => 'show'
     ]);
 
     Route::post('/store', [

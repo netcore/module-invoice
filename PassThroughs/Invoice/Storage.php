@@ -102,6 +102,12 @@ class Storage extends PassThrough
 
             $translations = array_get($frontendItem, 'translations', []);
             $backendItem->updateTranslations($translations);
+
+            $variables = array_get($frontendItem, 'variables', []);
+            $backendItem->variables()->delete();
+            foreach($variables as $key => $value){
+                $backendItem->variables()->create(compact('key', 'value'));
+            }
         }
 
         /**
