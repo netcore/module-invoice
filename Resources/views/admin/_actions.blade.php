@@ -6,8 +6,16 @@
     <i class="fa fa-eye"></i> Edit
 </a>
 
-{{--
-<a href="{{ route('invoice::show', $row) }}?download=1" class="btn btn-xs btn-success" download target="_blank">
-    <i class="fa fa-cloud-download"></i> Download
+<a
+    class="btn btn-xs btn-danger confirm-action"
+    data-title="Confirmation"
+    data-text="Invoice will be deleted. Are you sure?"
+    data-confirm-button-text="Delete"
+    data-method="DELETE"
+    data-href="{{ route('invoice::destroy', $row) }}"
+    data-success-title="Success"
+    data-success-text="Invoice was deleted"
+    data-refresh-datatable="#invoices-datatable"
+>
+    <i class="fa fa-trash"></i> Delete
 </a>
---}}

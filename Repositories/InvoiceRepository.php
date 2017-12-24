@@ -329,7 +329,14 @@ class InvoiceRepository
         return Invoice::count();
     }
 
-    public function relationPagination(String $foreignKey, String $keyword)
+    /**
+     * @param String $foreignKey
+     * @param String $keyword
+     * @param Int $itemsPerPage
+     * @param Int $page
+     * @return array
+     */
+    public function relationPagination(String $foreignKey, String $keyword, Int $itemsPerPage, Int $page)
     {
 
         $relations = config('netcore.module-invoice.relations');
@@ -380,12 +387,17 @@ class InvoiceRepository
             });
         }
 
-        $items = $query->get()->map(function ($item) use ($foreignKey) {
-            return [
-                'id'   => $item->id,
-                'text' => $this->labelForRelationItem($item, $foreignKey)
-            ];
-        });
+        $offset = $itemsPerPage * ($page - 1);
+        $items = $query
+            ->offset($offset)
+            ->limit($itemsPerPage)
+            ->get()
+            ->map(function ($item) use ($foreignKey) {
+                return [
+                    'id'   => $item->id,
+                    'text' => $this->labelForRelationItem($item, $foreignKey)
+                ];
+            });
 
         $items = [
             'items'       => $items,

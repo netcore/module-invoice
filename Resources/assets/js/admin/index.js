@@ -21,6 +21,7 @@ init.push(() => {
 
         columns.push({data: 'total_without_vat', name: 'total_without_vat', orderable: true, searchable: true});
         columns.push({data: 'total_with_vat', name: 'total_with_vat', orderable: true, searchable: true});
+        columns.push({data: 'payment', orderable: false, searchable: false });
         columns.push({data: 'actions', orderable: false, searchable: false, className: 'text-right'});
 
         table.dataTable({

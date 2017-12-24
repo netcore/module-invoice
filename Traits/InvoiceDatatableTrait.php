@@ -13,7 +13,7 @@ trait InvoiceDatatableTrait
         $relations = collect($relations)->where('enabled', true);
 
         $datatable = DataTables::of(
-            Invoice::query()
+            Invoice::query()->with('payments')
         );
 
         // Modify relation display format
@@ -29,12 +29,17 @@ trait InvoiceDatatableTrait
             });
         }
 
+        $datatable->addColumn('payment', function ($row) {
+            return view('invoice::admin._payment', compact('row'))->render();
+        });
+
         $datatable->addColumn('actions', function ($row) {
             return view('invoice::admin._actions', compact('row'))->render();
         });
 
         $datatable->rawColumns([
-            'actions',
+            'payment',
+            'actions'
         ]);
 
         return $datatable->make(true);

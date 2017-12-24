@@ -1,3 +1,16 @@
+@php
+    $paymentStateOptions = \Modules\Payment\Modules\Payment::STATE_OPTIONS;
+
+    // At the moment payment methods are hardcoded as ENUM fields
+    // in module-payment. It's not ideal because these can vary
+    // from project to project. Morover, module-invoice and module-payment
+    // are tight-coupled. These flaws must be addressed.
+    $paymentMethodOptions = config('netcore.module-payment.states');
+
+    $payment = $model->payments()->first();
+    $paymentState = $payment ? $payment->state : 'in_process';
+    $paymentMethod = $payment ? $payment->method : 'paypal';
+@endphp
 
 <div class="row">
     <div class="col-xs-offset-8 col-xs-4 text-align-right">
@@ -66,6 +79,34 @@
                             'step' => '0.01',
                             'style' => 'height:32px; padding:8px 14px;',
                             'disabled'
+                        ]) }}
+                    </fieldset>
+                </td>
+            </tr>
+            <tr>
+                <td class="padding-10">
+                    <label for="payment[method]">Payment method</label>
+                </td>
+                <td>
+                    <fieldset class="form-group form-group-lg">
+                        {{ Form::select('payment[method]', $paymentMethodOptions, $paymentMethod, [
+                            'class' => 'form-control',
+                            'autocomplete' => 'off',
+                            'style' => 'height:32px; padding:3px 14px;'
+                        ]) }}
+                    </fieldset>
+                </td>
+            </tr>
+            <tr>
+                <td class="padding-10">
+                    <label for="payment[state]">Payment state</label>
+                </td>
+                <td>
+                    <fieldset class="form-group form-group-lg">
+                        {{ Form::select('payment[state]', $paymentStateOptions, $paymentState, [
+                            'class' => 'form-control',
+                            'autocomplete' => 'off',
+                            'style' => 'height:32px; padding:3px 14px;'
                         ]) }}
                     </fieldset>
                 </td>

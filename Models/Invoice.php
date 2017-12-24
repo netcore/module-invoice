@@ -9,6 +9,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Modules\Invoice\Exceptions\InvoiceBaseException;
 use Modules\Invoice\PassThroughs\Invoice\Storage;
+use Modules\Payment\Modules\Payment;
 use PDF;
 use Modules\Crud\Traits\CRUDModel;
 
@@ -150,6 +151,19 @@ class Invoice extends Model
     public function items(): HasMany
     {
         return $this->hasMany(InvoiceItem::class);
+    }
+
+    /**
+     * Invoice has many payments
+     *
+     * TODO: this should be refactored in next major release
+     * (invoice should normally have one payment only)
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     */
+    public function payments(): HasMany
+    {
+        return $this->hasMany(Payment::class);
     }
 
     /** -------------------- PassThrough -------------------- */

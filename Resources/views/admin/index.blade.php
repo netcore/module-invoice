@@ -30,6 +30,7 @@
                             @endforeach
                             <th>Total without VAT</th>
                             <th>Total with VAT</th>
+                            <th>Payment</th>
                             <th>Actions</th>
                         </tr>
                     </thead>

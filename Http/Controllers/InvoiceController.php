@@ -93,17 +93,30 @@ class InvoiceController extends Controller
     }
 
     /**
+     * @param Invoice $invoice
+     * @return array
+     */
+    public function destroy(Invoice $invoice)
+    {
+        $invoice->delete();
+
+        return [
+            'success' => true
+        ];
+    }
+
+    /**
      * @return array
      */
     public function relationPagination()
     {
         $itemsPerPage = 30;
-        $keyword = request()->get('q', '');
-        $page = request()->get('page', 1);
+        $keyword = request()->get('q') ?: '';
+        $page = request()->get('page') ?: 1;
         $foreignKey = request()->get('foreignKey'); // e.g. currency_id or user_id
 
         $repo = new InvoiceRepository();
-        $items = $repo->relationPagination($foreignKey, $keyword);
+        $items = $repo->relationPagination($foreignKey, $keyword, $itemsPerPage, $page);
 
         return $items;
     }

@@ -46,4 +46,9 @@ Route::group([
         'uses' => 'InvoiceController@relationPagination',
         'as'   => 'relation-pagination'
     ]);
+
+    Route::delete('/destroy/{invoice}', [
+        'uses' => 'InvoiceController@destroy',
+        'as'   => 'destroy'
+    ]);
 });
