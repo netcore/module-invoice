@@ -2,6 +2,10 @@
     <i class="fa fa-eye"></i> View
 </a>
 
+<a href="{{ route('invoice::show', [$row, 'download' => 1]) }}" class="btn btn-xs btn-warning" target="_blank">
+    <i class="fa fa-cloud-download"></i> Download
+</a>
+
 <a href="{{ route('invoice::edit', $row) }}" class="btn btn-xs btn-success">
     <i class="fa fa-eye"></i> Edit
 </a>

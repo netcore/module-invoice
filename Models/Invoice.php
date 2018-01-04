@@ -75,6 +75,7 @@ class Invoice extends Model
         'receiver_data',
         'data',
         'vat',
+        'type',
     ];
 
     /**

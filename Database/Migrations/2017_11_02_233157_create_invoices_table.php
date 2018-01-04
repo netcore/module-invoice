@@ -21,6 +21,8 @@ class CreateInvoicesTable extends Migration
             $table->decimal('total_without_vat', 7, 2)->default(0);
             $table->unsignedInteger('vat')->nullable();
 
+            $table->string('type')->default('invoice');
+
             $table->string('payment_details')->nullable();
             $table->text('sender_data')->nullable();
             $table->text('receiver_data')->nullable();
