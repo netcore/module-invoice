@@ -10,7 +10,6 @@ use Modules\Invoice\Traits\InvoiceDatatableTrait;
 
 class InvoiceController extends Controller
 {
-
     use InvoiceDatatableTrait;
 
     /**
@@ -95,6 +94,7 @@ class InvoiceController extends Controller
     /**
      * @param Invoice $invoice
      * @return array
+     * @throws \Exception
      */
     public function destroy(Invoice $invoice)
     {

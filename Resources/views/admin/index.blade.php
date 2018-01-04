@@ -4,6 +4,8 @@
 
     {!! Breadcrumbs::render('admin.invoice') !!}
 
+    @include('admin::_partials._messages')
+
     <div class="panel panel-default">
         <div class="panel-heading">
             Invoices &nbsp; <span class="label label-info">{{ invoice()->totalCount() }}</span>
@@ -11,6 +13,12 @@
                 <a href="{{ route('invoice::create') }}" class="btn btn-xs btn-success">
                     <i class="fa fa-plus-circle"></i> Create
                 </a>
+
+                @if(config('netcore.module-invoice.export.enabled', false))
+                    <a href="#export-modal" class="btn btn-xs btn-primary" data-toggle="modal">
+                        <i class="fa fa-file-excel-o"></i> Export
+                    </a>
+                @endif
             </div>
         </div>
         <div class="panel-body overflow-x-auto">
@@ -38,6 +46,10 @@
             </div>
         </div>
     </div>
+
+    @if(config('netcore.module-invoice.export.enabled'))
+        @include(config('netcore.module-invoice.export.modal-view'))
+    @endif
 
 @endsection
 

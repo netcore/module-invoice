@@ -4,6 +4,15 @@
 </div>
 
 <div class="p-x-1" id="form-body" hidden>
+    <div class="form-group">
+        {!! Form::label('type', 'Type') !!}
+        {!! Form::select('type', [
+            'invoice' => 'Invoice',
+            'refund'  => 'Refund'
+        ], null, [
+            'class' => 'form-control input-lg'
+        ]) !!}
+    </div>
 
     @include('invoice::admin.form.relations')
     @include('invoice::admin.form.base')

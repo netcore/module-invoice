@@ -71,7 +71,7 @@ return [
         'email_address'       => 'support@example.com',
     ],
 
-    'create_default_fields' => [
+    'create_default_fields'  => [
         'sender'   => [
             'company_name'    => '',
             'company_address' => '',
@@ -82,22 +82,46 @@ return [
             'vat_number' => '',
             'address'    => '',
             'city'       => '',
-            'zip_code'   => ''
-        ]
+            'zip_code'   => '',
+        ],
     ],
 
     /**
      * Zero-padded invoice nr.
      */
-    'invoice_nr_padded_by'  => 6,
+    'invoice_nr_padded_by'   => 6,
 
     /**
      * Invoice nr. prefix
      */
-    'invoice_nr_prefix'     => 'INV',
+    'invoice_nr_prefix'      => 'INV',
 
     /**
      * When creating - prices are passed with vat?
      */
-    'prices_given_with_vat' => true,
+    'prices_given_with_vat'  => true,
+
+    /**
+     * Variables that will be store in
+     * netcore_invoice__invoice_item_variables
+     *
+     * They contain extra information about each invoice item
+     * when simply storing "name" of item is not enough.
+     *
+     * For example, in GAS we might have items
+     * with name "Premium monthly subscription"
+     * and a key "period" with value of "Nov 1 - Nov 31"
+     *
+     */
+    'invoice_item_variables' => [
+        'period',
+    ],
+
+    /**
+     * Export config.
+     */
+    'export'                 => [
+        'enabled'    => false,
+        'modal-view' => 'module-invoice.export-modal',
+    ],
 ];
