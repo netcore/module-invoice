@@ -1,15 +1,26 @@
 @php
-    $paymentStateOptions = \Modules\Payment\Modules\Payment::STATE_OPTIONS;
+    $hasPaymentModule = Module::has('Payment');
 
-    // At the moment payment methods are hardcoded as ENUM fields
-    // in module-payment. It's not ideal because these can vary
-    // from project to project. Morover, module-invoice and module-payment
-    // are tight-coupled. These flaws must be addressed.
-    $paymentMethodOptions = config('netcore.module-payment.states');
+    if($hasPaymentModule) {
+        $paymentStateOptions = \Modules\Payment\Modules\Payment::STATE_OPTIONS;
+        $paymentMethodOptions = config('netcore.module-payment.states');
 
-    $payment = $model->payments()->first();
-    $paymentState = $payment ? $payment->state : 'in_process';
-    $paymentMethod = $payment ? $payment->method : 'paypal';
+        $payment = $model->payments()->first();
+        $paymentState = $payment ? $payment->state : 'in_process';
+        $paymentMethod = $payment ? $payment->method : 'paypal';
+    } else {
+        $paymentStateOptions = config('netcore.module-invoice.payment_state_options', [
+            'paid'   => 'Paid',
+            'unpaid' => 'Unpaid'
+        ]);
+
+        $paymentMethodOptions = config('netcore.module-invoice.payment_method_options', [
+            'bank_transfer' => 'Bank transfer'
+        ]);
+
+        $paymentState = $model->payment_state;
+        $paymentMethod = $model->payment_method;
+    }
 @endphp
 
 <div class="row">

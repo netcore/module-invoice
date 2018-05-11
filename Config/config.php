@@ -124,4 +124,21 @@ return [
         'enabled'    => false,
         'modal-view' => 'module-invoice.export-modal',
     ],
+
+    /**
+     * Available payment states.
+     * For standalone mode, without Payment module.
+     */
+    'payment_state_options'  => [
+        'paid'   => 'Paid',
+        'unpaid' => 'Unpaid',
+    ],
+
+    /**
+     * Available payment methods.
+     * For standalone mode, without Payment module.
+     */
+    'payment_method_options' => [
+        'bank_transfer' => 'Bank transfer',
+    ],
 ];
