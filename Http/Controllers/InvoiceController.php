@@ -30,6 +30,7 @@ class InvoiceController extends Controller
      *
      * @param Invoice $invoice
      * @return \Illuminate\Http\Response|\Symfony\Component\HttpFoundation\StreamedResponse
+     * @throws \Modules\Invoice\Exceptions\InvoiceBaseException
      */
     public function show(Invoice $invoice)
     {

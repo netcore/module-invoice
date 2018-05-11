@@ -28,9 +28,17 @@ class CreateInvoicesTable extends Migration
             $table->text('receiver_data')->nullable();
             $table->text('data')->nullable();
 
+            $table->enum('shipping_status', ['pending', 'shipped', 'received'])->default('pending');
+
+            if (!Module::has('Payment')) {
+                $table->enum('payment_status', ['unpaid', 'paid'])->default('unpaid');
+            } else {
+                $table->unsignedInteger('payment_id')->nullable();
+                $table->foreign('payment_id')->references('id')->on('netcore_payment__payments')->onDelete('restrict');
+            }
+
             $table->timestamps();
             $table->softDeletes();
-
         });
     }
 
@@ -43,5 +51,4 @@ class CreateInvoicesTable extends Migration
     {
         Schema::dropIfExists('netcore_invoice__invoices');
     }
-
 }

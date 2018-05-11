@@ -39,6 +39,7 @@
                             <th>Total without VAT</th>
                             <th>Total with VAT</th>
                             <th>Payment</th>
+                            <th>Shipping</th>
                             <th>Actions</th>
                         </tr>
                     </thead>
@@ -63,5 +64,6 @@
     <script type="text/javascript">
         var enabledRelations = {!! json_encode($relations) !!};
     </script>
+
     <script src="{{ versionedAsset('assets/invoice/admin/js/index.js') }}"></script>
 @endsection
