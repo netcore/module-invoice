@@ -18,7 +18,7 @@
             'bank_transfer' => 'Bank transfer'
         ]);
 
-        $paymentState = $model->payment_state;
+        $paymentState = $model->payment_status;
         $paymentMethod = $model->payment_method;
     }
 
