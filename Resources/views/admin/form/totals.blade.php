@@ -21,11 +21,19 @@
         $paymentState = $model->payment_state;
         $paymentMethod = $model->payment_method;
     }
+
+    // Shipping status.
+    $shippingStatuses = [
+        'pending'  => 'Pending',
+        'shipped'  => 'Shipped',
+        'received' => 'Received'
+    ];
+
+    $shippingStatus = $model->shipping_status;
 @endphp
 
 <div class="row">
     <div class="col-xs-offset-8 col-xs-4 text-align-right">
-
         <br>
 
         <table class="float-right">
@@ -33,9 +41,9 @@
                 <td class="padding-10">
                     <label for="vat">VAT %</label>
                 </td>
+
                 <td>
                     <fieldset class="form-group form-group-lg {{ $errors->has('vat') ? 'form-message-light has-error has-validation-error' : '' }}">
-
                         {{ Form::number('vat', null, [
                             'id' => 'vat',
                             'class' => 'form-control',
@@ -122,10 +130,23 @@
                     </fieldset>
                 </td>
             </tr>
+            <tr>
+                <td class="padding-10">
+                    <label for="shipping_status">Shipping status</label>
+                </td>
+                <td>
+                    <fieldset class="form-group form-group-lg">
+                        {{ Form::select('shipping_status', $shippingStatuses, $shippingStatus, [
+                            'style'        => 'height:32px; padding:3px 14px;',
+                            'class'        => 'form-control',
+                            'autocomplete' => 'off',
+                        ]) }}
+                    </fieldset>
+                </td>
+            </tr>
         </table>
 
         <div class="clearfix"></div>
-
     </div>
 </div>
 
