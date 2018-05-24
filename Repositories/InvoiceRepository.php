@@ -2,7 +2,6 @@
 
 namespace Modules\Invoice\Repositories;
 
-use Doctrine\DBAL\Types\ArrayType;
 use Illuminate\Contracts\Auth\Authenticatable;
 use Illuminate\Support\Collection;
 use Modules\Invoice\Exceptions\InvoiceBaseException;
@@ -87,6 +86,7 @@ class InvoiceRepository
      *
      * @param string $relationName
      * @param int $id
+     * @return \Modules\Invoice\Repositories\InvoiceRepository
      */
     public function associateWithRelation(string $relationName, int $id)
     {
@@ -105,6 +105,7 @@ class InvoiceRepository
      * Override invoice nr.
      *
      * @param string $invoiceNr
+     * @return \Modules\Invoice\Repositories\InvoiceRepository
      */
     public function setInvoiceNr(string $invoiceNr)
     {
@@ -117,7 +118,7 @@ class InvoiceRepository
      * Override VAT amount.
      *
      * @param int $vat
-     * @return $this
+     * @return \Modules\Invoice\Repositories\InvoiceRepository
      */
     public function setVat(int $vat)
     {
@@ -130,7 +131,7 @@ class InvoiceRepository
      * Set invoice items.
      *
      * @param array $items
-     * @return $this
+     * @return \Modules\Invoice\Repositories\InvoiceRepository
      */
     public function setItems(array $items)
     {
@@ -143,7 +144,7 @@ class InvoiceRepository
      * Override sender data.
      *
      * @param array $data
-     * @return $this
+     * @return \Modules\Invoice\Repositories\InvoiceRepository
      */
     public function setSender(array $data)
     {
@@ -156,7 +157,7 @@ class InvoiceRepository
      * Override receiver data.
      *
      * @param array $data
-     * @return $this
+     * @return \Modules\Invoice\Repositories\InvoiceRepository
      */
     public function setReceiver(array $data)
     {
@@ -169,7 +170,7 @@ class InvoiceRepository
      * Merge receiver data.
      *
      * @param array $data
-     * @return $this
+     * @return \Modules\Invoice\Repositories\InvoiceRepository
      */
     public function mergeReceiver(array $data)
     {
@@ -182,8 +183,8 @@ class InvoiceRepository
      * Set user as invoice receiver
      *
      * @param Authenticatable $authenticatable
+     * @return \Modules\Invoice\Repositories\InvoiceRepository
      * @throws InvoiceBaseException
-     * @return $this
      */
     public function forUser(Authenticatable $authenticatable)
     {
@@ -212,7 +213,7 @@ class InvoiceRepository
      * Set payment details field.
      *
      * @param string $details
-     * @return $this
+     * @return \Modules\Invoice\Repositories\InvoiceRepository
      */
     public function setPaymentDetails(string $details)
     {
@@ -338,7 +339,6 @@ class InvoiceRepository
      */
     public function relationPagination(String $foreignKey, String $keyword, Int $itemsPerPage, Int $page)
     {
-
         $relations = config('netcore.module-invoice.relations');
         $currentRelation = collect($relations)->where('foreignKey', $foreignKey)->first();
 
@@ -388,6 +388,7 @@ class InvoiceRepository
         }
 
         $offset = $itemsPerPage * ($page - 1);
+
         $items = $query
             ->offset($offset)
             ->limit($itemsPerPage)
@@ -395,24 +396,26 @@ class InvoiceRepository
             ->map(function ($item) use ($foreignKey) {
                 return [
                     'id'   => $item->id,
-                    'text' => $this->labelForRelationItem($item, $foreignKey)
+                    'text' => $this->labelForRelationItem($item, $foreignKey),
                 ];
             });
 
         $items = [
             'items'       => $items,
-            'total_count' => 1
+            'total_count' => 1,
         ];
 
         return $items;
     }
 
     /**
+     * Get label for relation item.
+     *
      * @param $item
      * @param $foreignKey
-     * @return String
+     * @return string
      */
-    public function labelForRelationItem($item, $foreignKey): String
+    public function labelForRelationItem($item, $foreignKey): string
     {
         try {
             $relations = config('netcore.module-invoice.relations');
@@ -432,8 +435,7 @@ class InvoiceRepository
                 $textItems[] = $item->$field;
             }
 
-            $result = join($textItems, ' ');
-            return $result;
+            return trim(join($textItems, ' '));
         } catch (\Throwable $e) {
             return '';
         }

@@ -2,16 +2,17 @@
 
 namespace Modules\Invoice\Models;
 
-use Barryvdh\Snappy\PdfWrapper;
-use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Relations\HasMany;
-use Illuminate\Database\Eloquent\SoftDeletes;
-use Modules\Invoice\Exceptions\InvoiceBaseException;
-use Modules\Invoice\PassThroughs\Invoice\Storage;
-use Modules\Payment\Modules\Payment;
 use PDF;
+use Barryvdh\Snappy\PdfWrapper;
+
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+
 use Modules\Crud\Traits\CRUDModel;
+use Modules\Payment\Modules\Payment;
+use Modules\Invoice\PassThroughs\Invoice\Storage;
+use Modules\Invoice\Exceptions\InvoiceBaseException;
 
 /**
  * Modules\Invoice\Models\Invoice
@@ -76,6 +77,8 @@ class Invoice extends Model
         'data',
         'vat',
         'type',
+        'currency_code',
+        'currency_symbol',
     ];
 
     /**

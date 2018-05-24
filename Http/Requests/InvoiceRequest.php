@@ -11,17 +11,9 @@ class InvoiceRequest extends FormRequest
      *
      * @return bool
      */
-    public function authorize()
+    public function authorize(): bool
     {
         return true;
-    }
-
-    public function messages()
-    {
-        return [
-            'user_id.required' => 'User is required',
-            'currency_id.required' => 'Currency is required',
-        ];
     }
 
     /**
@@ -29,15 +21,25 @@ class InvoiceRequest extends FormRequest
      *
      * @return array
      */
-    public function rules()
+    public function rules(): array
     {
-        $rules = [
+        return [
             'invoice_nr' => 'required',
-            'vat' => 'required',
-            'currency_id' => 'required',
-            'user_id' => 'required',
+            'user_id'    => 'required',
+            'vat'        => 'required',
         ];
+    }
 
-        return $rules;
+    /**
+     * Get custom messages for validator errors.
+     *
+     * @return array
+     */
+    public function messages(): array
+    {
+        return [
+            'user_id.required'     => 'User is required',
+            'currency_id.required' => 'Currency is required',
+        ];
     }
 }
