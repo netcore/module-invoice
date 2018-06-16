@@ -252,14 +252,14 @@ class InvoiceRepository
             'total_with_vat'    => 0,
             'total_without_vat' => 0,
             'vat'               => $this->vat,
-            'sender_data'       => $this->senderData,
-            'receiver_data'     => $this->receiverData,
             'payment_details'   => $this->paymentDetails,
         ];
 
         $invoice = Invoice::create(
             array_merge($invoiceData, $this->associatedRelations)
         );
+
+        // Store fields.
 
         foreach ($this->items as $itemData) {
             $price = (float)array_get($itemData, 'price', 0);

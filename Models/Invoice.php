@@ -72,8 +72,6 @@ class Invoice extends Model
         'total_without_vat',
         'payment_method',
         'payment_details',
-        'sender_data',
-        'receiver_data',
         'data',
         'vat',
         'type',
@@ -94,9 +92,16 @@ class Invoice extends Model
      * @var array
      */
     protected $casts = [
-        'sender_data'   => 'array',
-        'receiver_data' => 'array',
-        'data'          => 'array',
+        'data' => 'array',
+    ];
+
+    /**
+     * The relations to eager load on every query.
+     *
+     * @var array
+     */
+    protected $with = [
+        'fields'
     ];
 
     /**
@@ -148,6 +153,16 @@ class Invoice extends Model
     /** -------------------- Relations -------------------- */
 
     /**
+     * Invoice has many invoice fields.
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     */
+    public function fields(): HasMany
+    {
+        return $this->hasMany(InvoiceField::class);
+    }
+
+    /**
      * Invoice has many items
      *
      * @return \Illuminate\Database\Eloquent\Relations\HasMany
@@ -173,10 +188,11 @@ class Invoice extends Model
     /** -------------------- PassThrough -------------------- */
 
     /**
+     * Storage pass-through.
      *
      * @return Storage
      */
-    public function storage()
+    public function storage(): Storage
     {
         return new Storage($this);
     }
@@ -213,7 +229,7 @@ class Invoice extends Model
     }
 
     /**
-     * Get sender data property
+     * Get sender data property.
      *
      * @param string $key
      * @param string $fallback
@@ -221,11 +237,11 @@ class Invoice extends Model
      */
     public function getSenderParam(string $key, $fallback = '')
     {
-        return array_get($this->sender_data, $key, $fallback);
+        return optional($this->fields->where('type', 'sender')->where('key', $key)->first())->value ?? $fallback;
     }
 
     /**
-     * Get receiver data property
+     * Get receiver data property.
      *
      * @param string $key
      * @param string $fallback
@@ -233,7 +249,7 @@ class Invoice extends Model
      */
     public function getReceiverParam(string $key, $fallback = '')
     {
-        return array_get($this->receiver_data, $key, $fallback);
+        return optional($this->fields->where('type', 'receiver')->where('key', $key)->first())->value ?? $fallback;
     }
 
     /**
