@@ -22,18 +22,19 @@ class CreateNetcoreInvoiceInvoicesTable extends Migration
             $table->unsignedInteger('vat')->nullable();
 
             $table->string('type')->default('invoice');
+            $table->string('status')->default('new');
+            $table->string('payment_method')->nullable();
             $table->string('payment_details')->nullable();
-            $table->text('data')->nullable();
-
-            $table->string('processing_status')->nullable();
-            $table->string('shipping_status')->nullable();
 
             if (!Module::has('Payment')) {
-                $table->string('payment_status')->nullable();
+                $table->string('payment_status')->nullable()->default('unpaid');
             } else {
                 $table->unsignedInteger('payment_id')->nullable();
                 $table->foreign('payment_id')->references('id')->on('netcore_payment__payments')->onDelete('restrict');
             }
+
+            $table->string('currency_symbol', 5)->nullable();
+            $table->string('currency_code', 3)->nullable();
 
             $table->timestamps();
             $table->softDeletes();

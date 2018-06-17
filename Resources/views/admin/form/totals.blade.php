@@ -22,14 +22,9 @@
         $paymentMethod = $model->payment_method;
     }
 
-    // Shipping status.
-    $shippingStatuses = [
-        'pending'  => 'Pending',
-        'shipped'  => 'Shipped',
-        'received' => 'Received'
-    ];
-
-    $shippingStatus = $model->shipping_status;
+    // Status.
+    $status = $model->status;
+    $statusOptions = \Modules\Invoice\Models\Invoice::$statuses;
 @endphp
 
 <div class="row">
@@ -45,13 +40,13 @@
                 <td>
                     <fieldset class="form-group form-group-lg {{ $errors->has('vat') ? 'form-message-light has-error has-validation-error' : '' }}">
                         {{ Form::number('vat', null, [
-                            'id' => 'vat',
-                            'class' => 'form-control',
+                            'id'           => 'vat',
+                            'class'        => 'form-control',
                             'autocomplete' => 'off',
-                            'min' => '0',
-                            'max' => '100',
-                            'step' => '0.01',
-                            'style' => 'height:32px; padding:8px 14px;',
+                            'min'          => 0,
+                            'max'          => 100,
+                            'step'         => 0.01,
+                            'style'        => 'height:32px; padding:8px 14px;',
                         ]) }}
 
                         @if ($errors->has('vat'))
@@ -71,13 +66,13 @@
                 <td>
                     <fieldset class="form-group form-group-lg">
                         {{ Form::number('', $model->total_without_vat, [
-                            'id' => 'total-without-vat',
-                            'class' => 'form-control',
+                            'id'           => 'total-without-vat',
+                            'class'        => 'form-control',
                             'autocomplete' => 'off',
-                            'min' => '0',
-                            'max' => '10000',
-                            'step' => '0.01',
-                            'style' => 'height:32px; padding:8px 14px;',
+                            'min'          => 0,
+                            'max'          => 10000,
+                            'step'         => 0.01,
+                            'style'        => 'height:32px; padding:8px 14px;',
                             'disabled'
                         ]) }}
                     </fieldset>
@@ -90,14 +85,28 @@
                 <td>
                     <fieldset class="form-group form-group-lg">
                         {{ Form::number('', $model->total_with_vat, [
-                            'id' => 'total-with-vat',
-                            'class' => 'form-control',
+                            'id'           => 'total-with-vat',
+                            'class'        => 'form-control',
                             'autocomplete' => 'off',
-                            'min' => '0',
-                            'max' => '10000',
-                            'step' => '0.01',
-                            'style' => 'height:32px; padding:8px 14px;',
+                            'min'          => 0,
+                            'max'          => 10000,
+                            'step'         => 0.01,
+                            'style'        => 'height:32px; padding:8px 14px;',
                             'disabled'
+                        ]) }}
+                    </fieldset>
+                </td>
+            </tr>
+            <tr>
+                <td class="padding-10">
+                    <label for="processing_status">Order status</label>
+                </td>
+                <td>
+                    <fieldset class="form-group form-group-lg">
+                        {{ Form::select('status', $statusOptions, $status, [
+                            'class'        => 'form-control',
+                            'autocomplete' => 'off',
+                            'style'        => 'height:32px; padding:3px 14px;'
                         ]) }}
                     </fieldset>
                 </td>
@@ -109,9 +118,9 @@
                 <td>
                     <fieldset class="form-group form-group-lg">
                         {{ Form::select('payment[method]', $paymentMethodOptions, $paymentMethod, [
-                            'class' => 'form-control',
+                            'class'        => 'form-control',
                             'autocomplete' => 'off',
-                            'style' => 'height:32px; padding:3px 14px;'
+                            'style'        => 'height:32px; padding:3px 14px;'
                         ]) }}
                     </fieldset>
                 </td>
@@ -123,23 +132,9 @@
                 <td>
                     <fieldset class="form-group form-group-lg">
                         {{ Form::select('payment[state]', $paymentStateOptions, $paymentState, [
-                            'class' => 'form-control',
-                            'autocomplete' => 'off',
-                            'style' => 'height:32px; padding:3px 14px;'
-                        ]) }}
-                    </fieldset>
-                </td>
-            </tr>
-            <tr>
-                <td class="padding-10">
-                    <label for="shipping_status">Shipping status</label>
-                </td>
-                <td>
-                    <fieldset class="form-group form-group-lg">
-                        {{ Form::select('shipping_status', $shippingStatuses, $shippingStatus, [
-                            'style'        => 'height:32px; padding:3px 14px;',
                             'class'        => 'form-control',
                             'autocomplete' => 'off',
+                            'style'        => 'height:32px; padding:3px 14px;'
                         ]) }}
                     </fieldset>
                 </td>

@@ -3,8 +3,9 @@
 @php
     $receiverDefaultFields = config('netcore.module-invoice.create_default_fields.receiver');
     $receiverKeyValuePairs = $receiverDefaultFields;
+
     if($model->exists) {
-        $receiverKeyValuePairs = $model->receiver_data;
+        $receiverKeyValuePairs = $model->fields->where('type', 'receiver')->pluck('value', 'key');
     }
 @endphp
 

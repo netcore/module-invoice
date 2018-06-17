@@ -55,6 +55,19 @@ class Invoice extends Model
     use CRUDModel;
 
     /**
+     * Invoice statuses.
+     *
+     * @var array
+     */
+    static $statuses = [
+        'new'             => 'New',
+        'rejected'        => 'Rejected',
+        'pending_payment' => 'Pending payment',
+        'shipped'         => 'Shipped',
+        'completed'       => 'Completed',
+    ];
+
+    /**
      * Table name.
      *
      * @var string
@@ -70,11 +83,12 @@ class Invoice extends Model
         'invoice_nr',
         'total_with_vat',
         'total_without_vat',
-        'payment_method',
-        'payment_details',
-        'data',
         'vat',
         'type',
+        'status',
+        'payment_method',
+        'payment_details',
+        'payment_status',
         'currency_code',
         'currency_symbol',
     ];
@@ -101,7 +115,7 @@ class Invoice extends Model
      * @var array
      */
     protected $with = [
-        'fields'
+        'fields',
     ];
 
     /**
@@ -174,7 +188,6 @@ class Invoice extends Model
 
     /**
      * Invoice has many payments
-     *
      * TODO: this should be refactored in next major release
      * (invoice should normally have one payment only)
      *

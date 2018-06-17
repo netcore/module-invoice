@@ -104,17 +104,14 @@ return [
     /**
      * Variables that will be store in
      * netcore_invoice__invoice_item_variables
-     *
      * They contain extra information about each invoice item
      * when simply storing "name" of item is not enough.
-     *
      * For example, in GAS we might have items
      * with name "Premium monthly subscription"
      * and a key "period" with value of "Nov 1 - Nov 31"
-     *
      */
     'invoice_item_variables' => [
-        'period',
+        //'period',
     ],
 
     /**
@@ -139,6 +136,7 @@ return [
      * For standalone mode, without Payment module.
      */
     'payment_method_options' => [
+        'cash'          => 'Cash',
         'bank_transfer' => 'Bank transfer',
     ],
 ];

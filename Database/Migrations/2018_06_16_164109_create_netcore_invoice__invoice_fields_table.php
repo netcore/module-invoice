@@ -14,7 +14,6 @@ class CreateNetcoreInvoiceInvoiceFieldsTable extends Migration
     public function up()
     {
         Schema::create('netcore_invoice__invoice_fields', function (Blueprint $table) {
-            $table->increments('id');
             $table->unsignedInteger('invoice_id');
             $table->string('type');
             $table->string('key');

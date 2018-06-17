@@ -38,8 +38,8 @@
                             @endforeach
                             <th>Total without VAT</th>
                             <th>Total with VAT</th>
+                            <th>Status</th>
                             <th>Payment</th>
-                            <th>Shipping</th>
                             <th>Actions</th>
                         </tr>
                     </thead>
@@ -51,7 +51,6 @@
     @if(config('netcore.module-invoice.export.enabled'))
         @include(config('netcore.module-invoice.export.modal-view'))
     @endif
-
 @endsection
 
 @section('styles')

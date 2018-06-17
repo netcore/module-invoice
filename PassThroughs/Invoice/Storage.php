@@ -11,11 +11,15 @@ use Netcore\Translator\Helpers\TransHelper;
 class Storage extends PassThrough
 {
     /**
+     * Invoice model instance.
+     *
      * @var Invoice
      */
     private $invoice;
 
     /**
+     * Available application languages.
+     *
      * @var Collection
      */
     private $languages;
@@ -24,6 +28,7 @@ class Storage extends PassThrough
      * Storage constructor.
      *
      * @param Invoice $invoice
+     * @return void
      */
     public function __construct(Invoice $invoice)
     {
@@ -32,8 +37,11 @@ class Storage extends PassThrough
     }
 
     /**
+     * Update invoice.
+     *
      * @param array $requestData
      * @return Invoice
+     * @throws \Throwable
      */
     public function update(Array $requestData): Invoice
     {
@@ -45,6 +53,8 @@ class Storage extends PassThrough
     }
 
     /**
+     * DB transaction callback.
+     *
      * @param array $requestData
      * @return Invoice
      */
@@ -52,16 +62,38 @@ class Storage extends PassThrough
     {
         $invoice = $this->invoice;
 
+        if (!Module::has('Payment')) {
+            $requestData['payment_method'] = data_get($requestData, 'payment.method');
+            $requestData['payment_status'] = data_get($requestData, 'payment.state');
+        }
+
         /**
          * Regular data
          */
         $invoice->forceFill(array_only($requestData, [
-            'invoice_nr',
-            'sender_data',
-            'receiver_data',
             'vat',
-            'shipping_status',
+            'status',
+            'invoice_nr',
+            'payment_details',
+            'payment_status',
+            'payment_method',
         ]));
+
+        $invoice->fields()->delete();
+
+        $sender = data_get($requestData, 'sender_data', []);
+        $receiver = data_get($requestData, 'receiver_data', []);
+
+        // Store invoice fields.
+        $fieldsToInsert = [];
+
+        foreach (collect(compact('sender', 'receiver')) as $type => $items) {
+            foreach ($items as $key => $value) {
+                $fieldsToInsert[] = compact('type', 'key', 'value');
+            }
+        }
+
+        $invoice->fields()->createMany($fieldsToInsert);
 
         /**
          * Payment must be retrieved before updating relations

@@ -2,11 +2,13 @@
 
 namespace Modules\Invoice\Repositories;
 
-use Illuminate\Contracts\Auth\Authenticatable;
-use Illuminate\Support\Collection;
-use Modules\Invoice\Exceptions\InvoiceBaseException;
-use Modules\Invoice\Models\Invoice;
 use Netcore\Translator\Helpers\TransHelper;
+
+use Illuminate\Support\Collection;
+use Illuminate\Contracts\Auth\Authenticatable;
+
+use Modules\Invoice\Models\Invoice;
+use Modules\Invoice\Exceptions\InvoiceBaseException;
 
 class InvoiceRepository
 {
@@ -68,6 +70,8 @@ class InvoiceRepository
 
     /**
      * InvoiceRepository constructor.
+     *
+     * @return void
      */
     public function __construct()
     {
@@ -223,7 +227,7 @@ class InvoiceRepository
     }
 
     /**
-     * Create invoice
+     * Build and save invoice in the database.
      *
      * @return Invoice
      */
@@ -259,8 +263,19 @@ class InvoiceRepository
             array_merge($invoiceData, $this->associatedRelations)
         );
 
-        // Store fields.
+        // Store invoice fields.
+        $fields = collect(['sender' => $this->senderData, 'receiver' => $this->receiverData]);
+        $fieldsToInsert = [];
 
+        foreach ($fields as $type => $items) {
+            foreach ($items as $key => $value) {
+                $fieldsToInsert[] = compact('type', 'key', 'value');
+            }
+        }
+
+        $invoice->fields()->createMany($fieldsToInsert);
+
+        // Store invoice items.
         foreach ($this->items as $itemData) {
             $price = (float)array_get($itemData, 'price', 0);
 
@@ -273,8 +288,8 @@ class InvoiceRepository
                 $priceWithoutVat = $price;
             }
 
-            $priceWithoutVat = round($priceWithoutVat, 2);
             $priceWithVat = round($priceWithVat, 2);
+            $priceWithoutVat = round($priceWithoutVat, 2);
 
             $item = $invoice->items()->create([
                 'price_with_vat'    => $priceWithVat,
@@ -282,7 +297,9 @@ class InvoiceRepository
                 'quantity'          => array_get($itemData, 'quantity', 1),
             ]);
 
-            $item->createVariables(array_get($itemData, 'variables', []));
+            $item->createVariables(
+                array_get($itemData, 'variables', [])
+            );
 
             $translations = [];
 
@@ -302,7 +319,7 @@ class InvoiceRepository
     }
 
     /**
-     * Check if relation is enabled
+     * Determine if given relation exists and is enabled.
      *
      * @param string $name
      * @return bool
@@ -331,13 +348,15 @@ class InvoiceRepository
     }
 
     /**
-     * @param String $foreignKey
-     * @param String $keyword
-     * @param Int $itemsPerPage
-     * @param Int $page
+     * Paginate relational invoice fields.
+     *
+     * @param string $foreignKey
+     * @param string $keyword
+     * @param int $itemsPerPage
+     * @param int $page
      * @return array
      */
-    public function relationPagination(String $foreignKey, String $keyword, Int $itemsPerPage, Int $page)
+    public function relationPagination(string $foreignKey, string $keyword, int $itemsPerPage, int $page): array
     {
         $relations = config('netcore.module-invoice.relations');
         $currentRelation = collect($relations)->where('foreignKey', $foreignKey)->first();
@@ -347,16 +366,13 @@ class InvoiceRepository
         }
 
         $class = array_get($currentRelation, 'class');
-        $table = app()->make($class)->getTable();
         $ajaxSelect = array_get($currentRelation, 'ajaxSelect', []);
         $translatable = array_get($ajaxSelect, 'translatable', []);
         $notTranslatable = array_get($ajaxSelect, 'notTranslatable', []);
 
         $query = app()->make($class);
 
-        /**
-         * not-translatable fields
-         */
+        // Non-translatable fields.
         if (count($notTranslatable) == 1) {
             $firstField = array_get($notTranslatable, 0);
             $query->where($firstField, $keyword);
@@ -372,9 +388,7 @@ class InvoiceRepository
             });
         }
 
-        /**
-         * translatable fields
-         */
+        // Translatable fields.
         if ($translatable) {
             $query = $query->whereHas('translations', function ($subq) use ($translatable, $keyword) {
                 foreach ($translatable as $index => $field) {
@@ -400,12 +414,10 @@ class InvoiceRepository
                 ];
             });
 
-        $items = [
+        return [
             'items'       => $items,
             'total_count' => 1,
         ];
-
-        return $items;
     }
 
     /**

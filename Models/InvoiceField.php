@@ -20,6 +20,7 @@ class InvoiceField extends Model
      * @var array
      */
     protected $fillable = [
+        'key',
         'type',
         'value',
     ];
