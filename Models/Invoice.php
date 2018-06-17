@@ -307,6 +307,12 @@ class Invoice extends Model
      */
     public function getFormattedAmountAttribute(): string
     {
-        return $this->currency_symbol . ' ' . number_format($this->total_with_vat, 2, '.', '');
+        $total = number_format($this->total_with_vat, 2, '.', '');
+
+        if ($symbol = $this->currency_symbol) {
+            $total = $symbol . ' ' . $total;
+        }
+
+        return $total;
     }
 }
