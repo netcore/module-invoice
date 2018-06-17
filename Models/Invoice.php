@@ -18,32 +18,44 @@ use Modules\Invoice\Exceptions\InvoiceBaseException;
  * Modules\Invoice\Models\Invoice
  *
  * @property int $id
+ * @property int|null $user_id
  * @property string|null $invoice_nr
  * @property float $total_with_vat
  * @property float $total_without_vat
  * @property int|null $vat
+ * @property string $type
+ * @property string $status
+ * @property string|null $payment_method
  * @property string|null $payment_details
- * @property array $sender_data
- * @property array $receiver_data
- * @property array $data
+ * @property string|null $payment_status
+ * @property string|null $currency_symbol
+ * @property string|null $currency_code
  * @property \Carbon\Carbon|null $created_at
  * @property \Carbon\Carbon|null $updated_at
  * @property string|null $deleted_at
+ * @property-read \Illuminate\Database\Eloquent\Collection|\Modules\Invoice\Models\InvoiceField[] $fields
+ * @property-read string $formatted_amount
+ * @property-read float $total_vat
  * @property-read \Illuminate\Database\Eloquent\Collection|\Modules\Invoice\Models\InvoiceItem[] $items
+ * @property-write mixed $password
  * @method static bool|null forceDelete()
  * @method static \Illuminate\Database\Query\Builder|\Modules\Invoice\Models\Invoice onlyTrashed()
  * @method static bool|null restore()
  * @method static \Illuminate\Database\Eloquent\Builder|\Modules\Invoice\Models\Invoice whereCreatedAt($value)
- * @method static \Illuminate\Database\Eloquent\Builder|\Modules\Invoice\Models\Invoice whereData($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\Modules\Invoice\Models\Invoice whereCurrencyCode($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\Modules\Invoice\Models\Invoice whereCurrencySymbol($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\Modules\Invoice\Models\Invoice whereDeletedAt($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\Modules\Invoice\Models\Invoice whereId($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\Modules\Invoice\Models\Invoice whereInvoiceNr($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\Modules\Invoice\Models\Invoice wherePaymentDetails($value)
- * @method static \Illuminate\Database\Eloquent\Builder|\Modules\Invoice\Models\Invoice whereReceiverData($value)
- * @method static \Illuminate\Database\Eloquent\Builder|\Modules\Invoice\Models\Invoice whereSenderData($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\Modules\Invoice\Models\Invoice wherePaymentMethod($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\Modules\Invoice\Models\Invoice wherePaymentStatus($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\Modules\Invoice\Models\Invoice whereStatus($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\Modules\Invoice\Models\Invoice whereTotalWithVat($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\Modules\Invoice\Models\Invoice whereTotalWithoutVat($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\Modules\Invoice\Models\Invoice whereType($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\Modules\Invoice\Models\Invoice whereUpdatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\Modules\Invoice\Models\Invoice whereUserId($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\Modules\Invoice\Models\Invoice whereVat($value)
  * @method static \Illuminate\Database\Query\Builder|\Modules\Invoice\Models\Invoice withTrashed()
  * @method static \Illuminate\Database\Query\Builder|\Modules\Invoice\Models\Invoice withoutTrashed()
@@ -286,5 +298,15 @@ class Invoice extends Model
     public function getTotalVatAttribute(): float
     {
         return (float)number_format($this->total_with_vat - $this->total_without_vat, 2, '.', '');
+    }
+
+    /**
+     * Get formatted price with currency symbol prefix.
+     *
+     * @return string
+     */
+    public function getFormattedAmountAttribute(): string
+    {
+        return $this->currency_symbol . ' ' . number_format($this->total_with_vat, 2, '.', '');
     }
 }
