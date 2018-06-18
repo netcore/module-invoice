@@ -139,4 +139,9 @@ return [
         'cash'          => 'Cash',
         'bank_transfer' => 'Bank transfer',
     ],
+
+    /**
+     * Invoice mailable class.
+     */
+    'invoice_mailable'       => \App\Mail\InvoiceEmail::class,
 ];

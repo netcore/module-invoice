@@ -1,4 +1,3 @@
-
 <div id="form-loading">
     <span class="fa fa-gear fa-spin"></span> Loading...
 </div>
@@ -40,6 +39,13 @@
     <a href="{{ route('invoice::index') }}" class="btn btn-md btn-default m-t-3 m-r-1 pull-xs-right">
         <i class="fa fa-undo"></i> Back
     </a>
+
+    @if(isset($model) && $model->exists && $model->status !== 'new')
+        <a href="{{ route('invoice::send', $model) }}"
+           class="btn btn-md btn-{{ $model->is_sent ? 'danger' : 'success' }} m-t-3 m-r-1 pull-xs-right">
+            <i class="fa fa-send"></i> {{ $model->is_sent ? 'Resend' : 'Send' }} invoice to client
+        </a>
+    @endif
 </div>
 
 @section('scripts')

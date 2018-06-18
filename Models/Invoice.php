@@ -3,15 +3,19 @@
 namespace Modules\Invoice\Models;
 
 use PDF;
+use Mail;
 use Barryvdh\Snappy\PdfWrapper;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 use Modules\Crud\Traits\CRUDModel;
 use Modules\Payment\Modules\Payment;
+use Modules\Product\Models\ShippingOption;
 use Modules\Invoice\PassThroughs\Invoice\Storage;
+use Modules\Product\Models\ShippingOptionLocation;
 use Modules\Invoice\Exceptions\InvoiceBaseException;
 
 /**
@@ -98,11 +102,14 @@ class Invoice extends Model
         'vat',
         'type',
         'status',
+        'is_sent',
         'payment_method',
         'payment_details',
         'payment_status',
         'currency_code',
         'currency_symbol',
+        'shipping_option_id',
+        'shipping_option_location_id',
     ];
 
     /**
@@ -210,6 +217,26 @@ class Invoice extends Model
         return $this->hasMany(Payment::class);
     }
 
+    /**
+     * Invoice belongs to the shipping option.
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
+     */
+    public function shippingOption(): BelongsTo
+    {
+        return $this->belongsTo(ShippingOption::class);
+    }
+
+    /**
+     * Invoice belongs to the shipping option location.
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
+     */
+    public function shippingOptionLocation(): BelongsTo
+    {
+        return $this->belongsTo(ShippingOptionLocation::class);
+    }
+
     /** -------------------- PassThrough -------------------- */
 
     /**
@@ -220,6 +247,34 @@ class Invoice extends Model
     public function storage(): Storage
     {
         return new Storage($this);
+    }
+
+    /** -------------------- Accessors -------------------- */
+
+    /**
+     * Return how much VAT is
+     *
+     * @return float
+     */
+    public function getTotalVatAttribute(): float
+    {
+        return (float)number_format($this->total_with_vat - $this->total_without_vat, 2, '.', '');
+    }
+
+    /**
+     * Get formatted price with currency symbol prefix.
+     *
+     * @return string
+     */
+    public function getFormattedAmountAttribute(): string
+    {
+        $total = number_format($this->total_with_vat, 2, '.', '');
+
+        if ($symbol = $this->currency_symbol) {
+            $total = $symbol . ' ' . $total;
+        }
+
+        return $total;
     }
 
     /** -------------------- Other methods -------------------- */
@@ -291,28 +346,14 @@ class Invoice extends Model
     }
 
     /**
-     * Return how much VAT is
+     * Send invoice to the user.
      *
-     * @return float
+     * @return void
      */
-    public function getTotalVatAttribute(): float
+    public function sendInvoiceToUser(): void
     {
-        return (float)number_format($this->total_with_vat - $this->total_without_vat, 2, '.', '');
-    }
+        $mailableClass = config('netcore.module-invoice.mailable_class', \App\Mail\InvoiceEmail::class);
 
-    /**
-     * Get formatted price with currency symbol prefix.
-     *
-     * @return string
-     */
-    public function getFormattedAmountAttribute(): string
-    {
-        $total = number_format($this->total_with_vat, 2, '.', '');
-
-        if ($symbol = $this->currency_symbol) {
-            $total = $symbol . ' ' . $total;
-        }
-
-        return $total;
+        Mail::to($this->user)->send(new $mailableClass($this));
     }
 }

@@ -148,4 +148,18 @@ class InvoiceController extends Controller
 
         return response()->json($items);
     }
+
+    /**
+     * Send invoice to client.
+     *
+     * @param \Modules\Invoice\Models\Invoice $invoice
+     * @return \Illuminate\Http\RedirectResponse
+     */
+    public function send(Invoice $invoice): RedirectResponse
+    {
+        $invoice->sendInvoiceToUser();
+        $invoice->update(['is_sent' => true]);
+
+        return back()->withSuccess('Invoice has been successfully sent!');
+    }
 }
