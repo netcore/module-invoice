@@ -37,6 +37,11 @@ Route::group([
         'as'   => 'edit'
     ]);
 
+    Route::get('/send/{invoice}', [
+        'uses' => 'InvoiceController@send',
+        'as'   => 'send'
+    ]);
+
     Route::put('/update/{invoice}', [
         'uses' => 'InvoiceController@update',
         'as'   => 'update'

@@ -3,8 +3,9 @@
 @php
     $senderDefaultFields = config('netcore.module-invoice.create_default_fields.sender');
     $senderKeyValuePairs = $senderDefaultFields;
+
     if($model->exists) {
-        $senderKeyValuePairs = $model->sender_data;
+        $senderKeyValuePairs = $model->fields->where('type', 'sender')->pluck('value', 'key');
     }
 @endphp
 

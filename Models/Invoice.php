@@ -3,47 +3,63 @@
 namespace Modules\Invoice\Models;
 
 use PDF;
+use Mail;
 use Barryvdh\Snappy\PdfWrapper;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 use Modules\Crud\Traits\CRUDModel;
 use Modules\Payment\Modules\Payment;
+use Modules\Product\Models\ShippingOption;
 use Modules\Invoice\PassThroughs\Invoice\Storage;
+use Modules\Product\Models\ShippingOptionLocation;
 use Modules\Invoice\Exceptions\InvoiceBaseException;
 
 /**
  * Modules\Invoice\Models\Invoice
  *
  * @property int $id
+ * @property int|null $user_id
  * @property string|null $invoice_nr
  * @property float $total_with_vat
  * @property float $total_without_vat
  * @property int|null $vat
+ * @property string $type
+ * @property string $status
+ * @property string|null $payment_method
  * @property string|null $payment_details
- * @property array $sender_data
- * @property array $receiver_data
- * @property array $data
+ * @property string|null $payment_status
+ * @property string|null $currency_symbol
+ * @property string|null $currency_code
  * @property \Carbon\Carbon|null $created_at
  * @property \Carbon\Carbon|null $updated_at
  * @property string|null $deleted_at
+ * @property-read \Illuminate\Database\Eloquent\Collection|\Modules\Invoice\Models\InvoiceField[] $fields
+ * @property-read string $formatted_amount
+ * @property-read float $total_vat
  * @property-read \Illuminate\Database\Eloquent\Collection|\Modules\Invoice\Models\InvoiceItem[] $items
+ * @property-write mixed $password
  * @method static bool|null forceDelete()
  * @method static \Illuminate\Database\Query\Builder|\Modules\Invoice\Models\Invoice onlyTrashed()
  * @method static bool|null restore()
  * @method static \Illuminate\Database\Eloquent\Builder|\Modules\Invoice\Models\Invoice whereCreatedAt($value)
- * @method static \Illuminate\Database\Eloquent\Builder|\Modules\Invoice\Models\Invoice whereData($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\Modules\Invoice\Models\Invoice whereCurrencyCode($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\Modules\Invoice\Models\Invoice whereCurrencySymbol($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\Modules\Invoice\Models\Invoice whereDeletedAt($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\Modules\Invoice\Models\Invoice whereId($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\Modules\Invoice\Models\Invoice whereInvoiceNr($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\Modules\Invoice\Models\Invoice wherePaymentDetails($value)
- * @method static \Illuminate\Database\Eloquent\Builder|\Modules\Invoice\Models\Invoice whereReceiverData($value)
- * @method static \Illuminate\Database\Eloquent\Builder|\Modules\Invoice\Models\Invoice whereSenderData($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\Modules\Invoice\Models\Invoice wherePaymentMethod($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\Modules\Invoice\Models\Invoice wherePaymentStatus($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\Modules\Invoice\Models\Invoice whereStatus($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\Modules\Invoice\Models\Invoice whereTotalWithVat($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\Modules\Invoice\Models\Invoice whereTotalWithoutVat($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\Modules\Invoice\Models\Invoice whereType($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\Modules\Invoice\Models\Invoice whereUpdatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\Modules\Invoice\Models\Invoice whereUserId($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\Modules\Invoice\Models\Invoice whereVat($value)
  * @method static \Illuminate\Database\Query\Builder|\Modules\Invoice\Models\Invoice withTrashed()
  * @method static \Illuminate\Database\Query\Builder|\Modules\Invoice\Models\Invoice withoutTrashed()
@@ -53,6 +69,19 @@ class Invoice extends Model
 {
     use SoftDeletes;
     use CRUDModel;
+
+    /**
+     * Invoice statuses.
+     *
+     * @var array
+     */
+    static $statuses = [
+        'new'             => 'New',
+        'rejected'        => 'Rejected',
+        'pending_payment' => 'Pending payment',
+        'shipped'         => 'Shipped',
+        'completed'       => 'Completed',
+    ];
 
     /**
      * Table name.
@@ -70,15 +99,17 @@ class Invoice extends Model
         'invoice_nr',
         'total_with_vat',
         'total_without_vat',
-        'payment_method',
-        'payment_details',
-        'sender_data',
-        'receiver_data',
-        'data',
         'vat',
         'type',
+        'status',
+        'is_sent',
+        'payment_method',
+        'payment_details',
+        'payment_status',
         'currency_code',
         'currency_symbol',
+        'shipping_option_id',
+        'shipping_option_location_id',
     ];
 
     /**
@@ -94,9 +125,16 @@ class Invoice extends Model
      * @var array
      */
     protected $casts = [
-        'sender_data'   => 'array',
-        'receiver_data' => 'array',
-        'data'          => 'array',
+        'data' => 'array',
+    ];
+
+    /**
+     * The relations to eager load on every query.
+     *
+     * @var array
+     */
+    protected $with = [
+        'fields',
     ];
 
     /**
@@ -148,6 +186,16 @@ class Invoice extends Model
     /** -------------------- Relations -------------------- */
 
     /**
+     * Invoice has many invoice fields.
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     */
+    public function fields(): HasMany
+    {
+        return $this->hasMany(InvoiceField::class);
+    }
+
+    /**
      * Invoice has many items
      *
      * @return \Illuminate\Database\Eloquent\Relations\HasMany
@@ -159,7 +207,6 @@ class Invoice extends Model
 
     /**
      * Invoice has many payments
-     *
      * TODO: this should be refactored in next major release
      * (invoice should normally have one payment only)
      *
@@ -170,15 +217,64 @@ class Invoice extends Model
         return $this->hasMany(Payment::class);
     }
 
+    /**
+     * Invoice belongs to the shipping option.
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
+     */
+    public function shippingOption(): BelongsTo
+    {
+        return $this->belongsTo(ShippingOption::class);
+    }
+
+    /**
+     * Invoice belongs to the shipping option location.
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
+     */
+    public function shippingOptionLocation(): BelongsTo
+    {
+        return $this->belongsTo(ShippingOptionLocation::class);
+    }
+
     /** -------------------- PassThrough -------------------- */
 
     /**
+     * Storage pass-through.
      *
      * @return Storage
      */
-    public function storage()
+    public function storage(): Storage
     {
         return new Storage($this);
+    }
+
+    /** -------------------- Accessors -------------------- */
+
+    /**
+     * Return how much VAT is
+     *
+     * @return float
+     */
+    public function getTotalVatAttribute(): float
+    {
+        return (float)number_format($this->total_with_vat - $this->total_without_vat, 2, '.', '');
+    }
+
+    /**
+     * Get formatted price with currency symbol prefix.
+     *
+     * @return string
+     */
+    public function getFormattedAmountAttribute(): string
+    {
+        $total = number_format($this->total_with_vat, 2, '.', '');
+
+        if ($symbol = $this->currency_symbol) {
+            $total = $symbol . ' ' . $total;
+        }
+
+        return $total;
     }
 
     /** -------------------- Other methods -------------------- */
@@ -213,7 +309,7 @@ class Invoice extends Model
     }
 
     /**
-     * Get sender data property
+     * Get sender data property.
      *
      * @param string $key
      * @param string $fallback
@@ -221,11 +317,11 @@ class Invoice extends Model
      */
     public function getSenderParam(string $key, $fallback = '')
     {
-        return array_get($this->sender_data, $key, $fallback);
+        return optional($this->fields->where('type', 'sender')->where('key', $key)->first())->value ?? $fallback;
     }
 
     /**
-     * Get receiver data property
+     * Get receiver data property.
      *
      * @param string $key
      * @param string $fallback
@@ -233,7 +329,7 @@ class Invoice extends Model
      */
     public function getReceiverParam(string $key, $fallback = '')
     {
-        return array_get($this->receiver_data, $key, $fallback);
+        return optional($this->fields->where('type', 'receiver')->where('key', $key)->first())->value ?? $fallback;
     }
 
     /**
@@ -250,12 +346,14 @@ class Invoice extends Model
     }
 
     /**
-     * Return how much VAT is
+     * Send invoice to the user.
      *
-     * @return float
+     * @return void
      */
-    public function getTotalVatAttribute(): float
+    public function sendInvoiceToUser(): void
     {
-        return (float)number_format($this->total_with_vat - $this->total_without_vat, 2, '.', '');
+        $mailableClass = config('netcore.module-invoice.mailable_class', \App\Mail\InvoiceEmail::class);
+
+        Mail::to($this->user)->send(new $mailableClass($this));
     }
 }

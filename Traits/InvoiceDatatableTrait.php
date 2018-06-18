@@ -2,8 +2,8 @@
 
 namespace Modules\Invoice\Traits;
 
-use Illuminate\Http\JsonResponse;
 use Module;
+use Illuminate\Http\JsonResponse;
 use Modules\Invoice\Models\Invoice;
 use Yajra\DataTables\Facades\DataTables;
 
@@ -40,12 +40,12 @@ trait InvoiceDatatableTrait
             });
         }
 
-        $datatable->addColumn('payment', function ($row) {
-            return view('invoice::admin.tds.payment', compact('row'))->render();
+        $datatable->editColumn('status', function (Invoice $invoice) {
+            return array_get(Invoice::$statuses, $invoice->status, 'Unknown status');
         });
 
-        $datatable->addColumn('shipping', function ($row) {
-            return ucfirst($row->shipping_status);
+        $datatable->addColumn('payment', function ($row) {
+            return view('invoice::admin.tds.payment', compact('row'))->render();
         });
 
         $datatable->addColumn('actions', function ($row) {

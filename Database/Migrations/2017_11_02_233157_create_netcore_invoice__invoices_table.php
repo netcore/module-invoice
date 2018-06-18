@@ -4,7 +4,7 @@ use Illuminate\Support\Facades\Schema;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
 
-class CreateInvoicesTable extends Migration
+class CreateNetcoreInvoiceInvoicesTable extends Migration
 {
     /**
      * Run the migrations.
@@ -22,20 +22,26 @@ class CreateInvoicesTable extends Migration
             $table->unsignedInteger('vat')->nullable();
 
             $table->string('type')->default('invoice');
-
+            $table->string('status')->default('new');
+            $table->string('payment_method')->nullable();
             $table->string('payment_details')->nullable();
-            $table->text('sender_data')->nullable();
-            $table->text('receiver_data')->nullable();
-            $table->text('data')->nullable();
-
-            $table->enum('shipping_status', ['pending', 'shipped', 'received'])->default('pending');
 
             if (!Module::has('Payment')) {
-                $table->enum('payment_status', ['unpaid', 'paid'])->default('unpaid');
+                $table->string('payment_status')->nullable()->default('unpaid');
             } else {
                 $table->unsignedInteger('payment_id')->nullable();
                 $table->foreign('payment_id')->references('id')->on('netcore_payment__payments')->onDelete('restrict');
             }
+
+            if (Module::has('Product')) {
+                $table->unsignedInteger('shipping_option_id');
+                $table->unsignedInteger('shipping_option_location_id')->nullable();
+            }
+
+            $table->string('currency_symbol', 5)->nullable();
+            $table->string('currency_code', 3)->nullable();
+
+            $table->boolean('is_sent')->default(false);
 
             $table->timestamps();
             $table->softDeletes();

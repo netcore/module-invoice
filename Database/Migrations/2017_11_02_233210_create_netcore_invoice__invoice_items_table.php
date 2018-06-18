@@ -4,7 +4,7 @@ use Illuminate\Support\Facades\Schema;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
 
-class CreateInvoiceItemsTable extends Migration
+class CreateNetcoreInvoiceInvoiceItemsTable extends Migration
 {
     /**
      * Run the migrations.
@@ -20,20 +20,29 @@ class CreateInvoiceItemsTable extends Migration
             $table->decimal('price_with_vat', 7, 2)->default(0);
             $table->decimal('price_without_vat', 7, 2)->default(0);
             $table->unsignedInteger('quantity')->default(1);
+            $table->string('type')->default('item');
 
-            $table->foreign('invoice_id', 'invoice_id_foreign')->references('id')->on('netcore_invoice__invoices')->onDelete('CASCADE');
+            $table
+                ->foreign('invoice_id', 'invoice_id_foreign')
+                ->references('id')
+                ->on('netcore_invoice__invoices')
+                ->onDelete('CASCADE');
         });
 
         // Items are translatable
         Schema::create('netcore_invoice__invoice_item_translations', function(Blueprint $table) {
             $table->increments('id');
-            $table->unsignedInteger('invoice_item_id')->index('invoice_item_id_index');
+            $table->unsignedInteger('invoice_item_id');
             $table->string('locale', 2)->index();
-
             $table->string('name');
 
             $table->unique(['invoice_item_id', 'locale'], 'item_locale_unique');
-            $table->foreign('invoice_item_id', 'invoice_item_foreign')->references('id')->on('netcore_invoice__invoice_items')->onDelete('cascade');
+
+            $table
+                ->foreign('invoice_item_id', 'invoice_item_foreign')
+                ->references('id')
+                ->on('netcore_invoice__invoice_items')
+                ->onDelete('cascade');
         });
     }
 

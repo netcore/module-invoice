@@ -4,7 +4,7 @@ use Illuminate\Support\Facades\Schema;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
 
-class CreateInvoiceItemVariablesTable extends Migration
+class CreateNetcoreInvoiceInvoiceItemVariablesTable extends Migration
 {
     /**
      * Run the migrations.
@@ -20,11 +20,11 @@ class CreateInvoiceItemVariablesTable extends Migration
             $table->string('key')->index();
             $table->string('value');
 
-            $table->foreign('invoice_item_id')
-                  ->references('id')
-                  ->on('netcore_invoice__invoice_items')
-                  ->onDelete('cascade');
-
+            $table
+                ->foreign('invoice_item_id')
+                ->references('id')
+                ->on('netcore_invoice__invoice_items')
+                ->onDelete('cascade');
         });
     }
 

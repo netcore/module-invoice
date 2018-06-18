@@ -17,9 +17,11 @@ use Modules\Invoice\Translations\InvoiceItemTranslation;
  * @property float $price_with_vat
  * @property float $price_without_vat
  * @property int $quantity
- * @property-read float $total
+ * @property-read float $total_with_vat
+ * @property-read float $total_without_vat
  * @property-read \Modules\Invoice\Models\Invoice $invoice
  * @property-read \Illuminate\Database\Eloquent\Collection|\Modules\Invoice\Translations\InvoiceItemTranslation[] $translations
+ * @property-read \Illuminate\Database\Eloquent\Collection|\Modules\Invoice\Models\InvoiceItemVariable[] $variables
  * @method static \Illuminate\Database\Eloquent\Builder|\Modules\Invoice\Models\InvoiceItem listsTranslations($translationField)
  * @method static \Illuminate\Database\Eloquent\Builder|\Modules\Invoice\Models\InvoiceItem notTranslatedIn($locale = null)
  * @method static \Illuminate\Database\Eloquent\Builder|\Modules\Invoice\Models\InvoiceItem orWhereTranslation($key, $value, $locale = null)
