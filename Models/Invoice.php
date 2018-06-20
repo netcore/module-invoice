@@ -2,6 +2,7 @@
 
 namespace Modules\Invoice\Models;
 
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use PDF;
 use Mail;
 use Barryvdh\Snappy\PdfWrapper;
@@ -9,13 +10,10 @@ use Barryvdh\Snappy\PdfWrapper;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Relations\HasMany;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 use Modules\Crud\Traits\CRUDModel;
 use Modules\Payment\Modules\Payment;
-use Modules\Product\Models\ShippingOption;
 use Modules\Invoice\PassThroughs\Invoice\Storage;
-use Modules\Product\Models\ShippingOptionLocation;
 use Modules\Invoice\Exceptions\InvoiceBaseException;
 
 /**
@@ -108,8 +106,6 @@ class Invoice extends Model
         'payment_status',
         'currency_code',
         'currency_symbol',
-        'shipping_option_id',
-        'shipping_option_location_id',
     ];
 
     /**
@@ -218,23 +214,13 @@ class Invoice extends Model
     }
 
     /**
-     * Invoice belongs to the shipping option.
+     * Invoice has one service entry.
      *
-     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
+     * @return \Illuminate\Database\Eloquent\Relations\HasOne
      */
-    public function shippingOption(): BelongsTo
+    public function service(): HasOne
     {
-        return $this->belongsTo(ShippingOption::class);
-    }
-
-    /**
-     * Invoice belongs to the shipping option location.
-     *
-     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
-     */
-    public function shippingOptionLocation(): BelongsTo
-    {
-        return $this->belongsTo(ShippingOptionLocation::class);
+        return $this->hasOne(InvoiceService::class);
     }
 
     /** -------------------- PassThrough -------------------- */

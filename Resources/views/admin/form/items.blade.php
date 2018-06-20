@@ -1,8 +1,6 @@
-
-
 @php
-$languages = \Netcore\Translator\Helpers\TransHelper::getAllLanguages();
-$configuredInvoiceItemVariables = config('netcore.module-invoice.invoice_item_variables', []);
+    $languages = \Netcore\Translator\Helpers\TransHelper::getAllLanguages();
+    $configuredInvoiceItemVariables = config('netcore.module-invoice.invoice_item_variables', []);
 @endphp
 
 <h3>Items</h3>

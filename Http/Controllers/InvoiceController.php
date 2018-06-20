@@ -103,6 +103,27 @@ class InvoiceController extends Controller
      */
     public function update(Invoice $invoice, InvoiceRequest $request): RedirectResponse
     {
+        if ($request->has('setShipping')) {
+            $invoice->service->update([
+                'shipping_option_id' => $request->input('shipping_option_id'),
+            ]);
+
+            session()->flash('shippingSuccess', 'Option successfully changed!');
+
+            return redirect(route('invoice::edit', $invoice) . '#shipping');
+        }
+
+        if ($request->has('submitToService')) {
+            $shippingOption = $invoice->service->shippingOption;
+            $handler = $shippingOption->handler;
+
+            $handlerClass = (new $handler)($invoice);
+
+            dd($handlerClass);
+
+            dd($request->all());
+        }
+
         $invoice->storage()->update(
             $request->all()
         );
