@@ -2,6 +2,7 @@
 
 namespace Modules\Invoice\Http\Controllers;
 
+use App\DataMappers\ShippingRecipient;
 use Exception;
 
 use Illuminate\View\View;
@@ -9,6 +10,8 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Routing\Controller;
 use Illuminate\Http\RedirectResponse;
 
+use Module;
+use Modules\Country\Models\Country;
 use Modules\Invoice\Models\Invoice;
 use Modules\Invoice\Traits\InvoiceDatatableTrait;
 use Modules\Invoice\Http\Requests\InvoiceRequest;
@@ -115,11 +118,22 @@ class InvoiceController extends Controller
 
         if ($request->has('submitToService')) {
             $shippingOption = $invoice->service->shippingOption;
-            $handler = $shippingOption->handler;
 
-            $handlerClass = (new $handler)($invoice);
+            if ($shippingOption->type == 'parcel_machine') {
+                $invoice->service->update([
+                    'shipping_option_location_id' => $request->input('shipping_option_location_id'),
+                ]);
+            }
 
-            dd($handlerClass);
+            $serviceHandler = app($shippingOption->handler);
+            $shippingRecipient = new ShippingRecipient($invoice);
+
+            $serviceHandler->createShipment($shippingRecipient, [
+                'parcels_count' => 1,
+                'service_type'  => 'PS',
+                'order_nr'      => $invoice->invoice_nr,
+                'parcelshop_id' => $invoice->service->shippingOptionLocation->fresh()->data->get('parcelshop_id'),
+            ]);
 
             dd($request->all());
         }

@@ -26,21 +26,39 @@
             </div>
         </div>
 
-        @if($model->service->shippingOption && $model->service->shippingOption->hasSelectableLocations())
-            @php
-                $locations = [];
+        @if($model->service->shippingOption)
+            {{-- Pickup location select --}}
+            @if($model->service->shippingOption->hasSelectableLocations())
+                @php
+                    $locations = [];
 
-                if ($model->service->shippingOption) {
-                    $locations = $model->service->shippingOption->locations->pluck('location', 'id');
-                }
-            @endphp
+                    if ($model->service->shippingOption) {
+                        $locations = $model->service->shippingOption->locations->pluck('location', 'id');
+                    }
+                @endphp
 
-            <div class="form-group">
-                {{ Form::label('shipping_option_location_id', 'Shipping option location:') }}
-                {{ Form::select('shipping_option_location_id', $locations, $model->service->shipping_option_location_id, [
-                    'class' => 'form-control'
-                ]) }}
-            </div>
+                <div class="form-group">
+                    {{ Form::label('shipping_option_location_id', 'Shipping option location:') }}
+                    {{ Form::select('shipping_option_location_id', $locations, $model->service->shipping_option_location_id, [
+                        'class' => 'form-control'
+                    ]) }}
+                </div>
+            @endif
+
+            {{-- Service type --}}
+            @if($model->service->shippingOption->type === 'parcel_machine')
+                @php
+                    $handler = app($model->service->shippingOption->handler);
+                    $serviceTypes = $handler->getServicesOfType($model->service->shippingOption->type);
+                @endphp
+
+                <div class="form-group">
+                    {{ Form::label('service_type', 'Service type:') }}
+                    {{ Form::select('service_type', $serviceTypes, null, [
+                        'class' => 'form-control'
+                    ]) }}
+                </div>
+            @endif
         @endif
 
         <button type="submit" class="btn btn-warning" name="submitToService">
