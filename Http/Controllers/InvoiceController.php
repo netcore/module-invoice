@@ -122,20 +122,25 @@ class InvoiceController extends Controller
             if ($shippingOption->type == 'parcel_machine') {
                 $invoice->service->update([
                     'shipping_option_location_id' => $request->input('shipping_option_location_id'),
+                    'is_sent_to_service'          => true,
                 ]);
             }
 
             $serviceHandler = app($shippingOption->handler);
             $shippingRecipient = new ShippingRecipient($invoice);
 
-            $serviceHandler->createShipment($shippingRecipient, [
+            $psId = $invoice->service->shippingOptionLocation->fresh()->data->get('parcelshop_id');
+
+            $parcelId = $serviceHandler->createParcel($shippingRecipient, [
                 'parcels_count' => 1,
-                'service_type'  => 'PS',
+                'service_type'  => $request->input('service_type'),
                 'order_nr'      => $invoice->invoice_nr,
-                'parcelshop_id' => $invoice->service->shippingOptionLocation->fresh()->data->get('parcelshop_id'),
+                'parcelshop_id' => $psId,
             ]);
 
-            dd($request->all());
+            dd(
+                $parcelId
+            );
         }
 
         $invoice->storage()->update(

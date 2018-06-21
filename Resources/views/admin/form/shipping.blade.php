@@ -61,6 +61,15 @@
             @endif
         @endif
 
+        <div class="form-group">
+            {{ Form::label('weight', 'Weight (kg):') }}
+            {{ Form::number('weight', $model->service->weight, [
+                'class' => 'form-control',
+                'step'  => 0.1,
+                'min'   => 0
+            ]) }}
+        </div>
+
         <button type="submit" class="btn btn-warning" name="submitToService">
             <i class="fa fa-airplane-o"></i> Send to service
         </button>
