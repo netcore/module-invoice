@@ -2,7 +2,6 @@
 
 namespace Modules\Invoice\Http\Controllers;
 
-use App\DataMappers\ShippingRecipient;
 use Exception;
 
 use Illuminate\View\View;
@@ -10,16 +9,16 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Routing\Controller;
 use Illuminate\Http\RedirectResponse;
 
-use Module;
-use Modules\Country\Models\Country;
 use Modules\Invoice\Models\Invoice;
-use Modules\Invoice\Traits\InvoiceDatatableTrait;
 use Modules\Invoice\Http\Requests\InvoiceRequest;
+use Modules\Invoice\Traits\InvoiceDatatableTrait;
+use Modules\Invoice\Traits\InvoiceServiceMethods;
 use Modules\Invoice\Repositories\InvoiceRepository;
 
 class InvoiceController extends Controller
 {
     use InvoiceDatatableTrait;
+    use InvoiceServiceMethods;
 
     /**
      * Display a listing of invoices.
@@ -104,43 +103,21 @@ class InvoiceController extends Controller
      * @return \Illuminate\Http\RedirectResponse
      * @throws \Throwable
      */
-    public function update(Invoice $invoice, InvoiceRequest $request): RedirectResponse
+    public function update(Invoice $invoice, InvoiceRequest $request)
     {
+        // Set shipping option.
         if ($request->has('setShipping')) {
-            $invoice->service->update([
-                'shipping_option_id' => $request->input('shipping_option_id'),
-            ]);
-
-            session()->flash('shippingSuccess', 'Option successfully changed!');
-
-            return redirect(route('invoice::edit', $invoice) . '#shipping');
+            return $this->service__setShippingOption($invoice, $request);
         }
 
+        // Delete from service.
+        if ($request->has('deleteFromService')) {
+            return $this->service__deleteFromService($invoice, $request);
+        }
+
+        // Submit to service.
         if ($request->has('submitToService')) {
-            $shippingOption = $invoice->service->shippingOption;
-
-            if ($shippingOption->type == 'parcel_machine') {
-                $invoice->service->update([
-                    'shipping_option_location_id' => $request->input('shipping_option_location_id'),
-                    'is_sent_to_service'          => true,
-                ]);
-            }
-
-            $serviceHandler = app($shippingOption->handler);
-            $shippingRecipient = new ShippingRecipient($invoice);
-
-            $psId = $invoice->service->shippingOptionLocation->fresh()->data->get('parcelshop_id');
-
-            $parcelId = $serviceHandler->createParcel($shippingRecipient, [
-                'parcels_count' => 1,
-                'service_type'  => $request->input('service_type'),
-                'order_nr'      => $invoice->invoice_nr,
-                'parcelshop_id' => $psId,
-            ]);
-
-            dd(
-                $parcelId
-            );
+            return $this->service__submitToService($invoice, $request);
         }
 
         $invoice->storage()->update(

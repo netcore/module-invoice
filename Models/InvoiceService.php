@@ -5,6 +5,7 @@ namespace Modules\Invoice\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Modules\Product\Models\ShippingOption;
 use Modules\Product\Models\ShippingOptionLocation;
 
@@ -59,5 +60,28 @@ class InvoiceService extends Model
     public function shippingOptionLocation(): BelongsTo
     {
         return $this->belongsTo(ShippingOptionLocation::class);
+    }
+
+    /**
+     * Invoice service has many additional fields.
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     */
+    public function fields(): HasMany
+    {
+        return $this->hasMany(InvoiceServiceField::class);
+    }
+
+    /** -------------------- Helpers -------------------- */
+
+    /**
+     * Get service field.
+     *
+     * @param string $key
+     * @return mixed
+     */
+    public function getField(string $key)
+    {
+        return optional($this->fields->where('key', $key)->first())->value;
     }
 }

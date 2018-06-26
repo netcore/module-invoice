@@ -5,10 +5,15 @@
         @php
             $shippingOptions = \Modules\Product\Models\ShippingOption::with('translations', 'locations')->get();
             $shippingOptionsList = $shippingOptions->pluck('name', 'id');
+            $handler = app($model->service->shippingOption->handler);
         @endphp
 
         @if($success = session('shippingSuccess'))
             <div class="alert alert-success">{{ $success }}</div>
+        @endif
+
+        @if($error = session('shippingError'))
+            <div class="alert alert-danger">{{ $error }}</div>
         @endif
 
         <div class="form-group">
@@ -46,9 +51,8 @@
             @endif
 
             {{-- Service type --}}
-            @if($model->service->shippingOption->type === 'parcel_machine')
+            @if(method_exists($handler, 'getServicesOfType'))
                 @php
-                    $handler = app($model->service->shippingOption->handler);
                     $serviceTypes = $handler->getServicesOfType($model->service->shippingOption->type);
                 @endphp
 
@@ -63,16 +67,27 @@
 
         <div class="form-group">
             {{ Form::label('weight', 'Weight (kg):') }}
-            {{ Form::number('weight', $model->service->weight, [
+            {{ Form::number('serviceFields[weight]', $model->service->getField('weight'), [
                 'class' => 'form-control',
+                'id'    => 'weight',
                 'step'  => 0.1,
                 'min'   => 0
             ]) }}
         </div>
 
-        <button type="submit" class="btn btn-warning" name="submitToService">
-            <i class="fa fa-airplane-o"></i> Send to service
-        </button>
+        @if(!$model->service->is_sent_to_service)
+            <button type="submit" class="btn btn-warning" name="submitToService">
+                <i class="fa fa-paper-plane-o"></i> Send to service
+            </button>
+        @else
+            <button type="submit" class="btn btn-danger" name="deleteFromService">
+                <i class="fa fa-trash"></i> Delete parcel from service
+            </button>
+
+            <a href="{{ route('invoice::print-label', $model) }}" class="btn btn-warning" target="_blank">
+                <i class="fa fa-print"></i> Print parcel label
+            </a>
+        @endif
     </div>
 
     <div class="panel-footer text-right">
