@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Modules\Invoice\Contracts\ShippingHandlerContract;
 use Modules\Product\Models\ShippingOption;
 use Modules\Product\Models\ShippingOptionLocation;
 
@@ -83,5 +84,19 @@ class InvoiceService extends Model
     public function getField(string $key)
     {
         return optional($this->fields->where('key', $key)->first())->value;
+    }
+
+    /**
+     * Get the instance of service handler.
+     *
+     * @return \Modules\Invoice\Contracts\ShippingHandlerContract
+     */
+    public function getServiceHandler(): ?ShippingHandlerContract
+    {
+        if (!$this->shippingOption || !$this->shippingOption->handler) {
+            return null;
+        }
+
+        return app($this->shippingOption->handler);
     }
 }
