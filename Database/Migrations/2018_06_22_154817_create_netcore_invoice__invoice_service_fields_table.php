@@ -21,7 +21,7 @@ class CreateNetcoreInvoiceInvoiceServiceFieldsTable extends Migration
             $table->increments('id');
             $table->unsignedInteger('invoice_service_id');
             $table->string('key');
-            $table->text('value');
+            $table->text('value')->nullable();
 
             $table
                 ->foreign('invoice_service_id', 'invoice::invoice_service_fields-service_foreign')
