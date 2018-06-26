@@ -136,7 +136,7 @@ trait InvoiceServiceMethods
         $shippingOption = $invoice->service->shippingOption;
         $serviceHandler = app($shippingOption->handler);
 
-        $stream = $serviceHandler->createParcelLabel(
+        $stream = $serviceHandler->getParcelLabel(
             $invoice->service->service_side_id
         );
 
