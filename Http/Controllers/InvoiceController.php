@@ -10,13 +10,15 @@ use Illuminate\Routing\Controller;
 use Illuminate\Http\RedirectResponse;
 
 use Modules\Invoice\Models\Invoice;
-use Modules\Invoice\Traits\InvoiceDatatableTrait;
 use Modules\Invoice\Http\Requests\InvoiceRequest;
+use Modules\Invoice\Traits\InvoiceDatatableTrait;
+use Modules\Invoice\Traits\InvoiceServiceMethods;
 use Modules\Invoice\Repositories\InvoiceRepository;
 
 class InvoiceController extends Controller
 {
     use InvoiceDatatableTrait;
+    use InvoiceServiceMethods;
 
     /**
      * Display a listing of invoices.
@@ -101,8 +103,23 @@ class InvoiceController extends Controller
      * @return \Illuminate\Http\RedirectResponse
      * @throws \Throwable
      */
-    public function update(Invoice $invoice, InvoiceRequest $request): RedirectResponse
+    public function update(Invoice $invoice, InvoiceRequest $request)
     {
+        // Set shipping option.
+        if ($request->has('setShipping')) {
+            return $this->service__setShippingOption($invoice, $request);
+        }
+
+        // Delete from service.
+        if ($request->has('deleteFromService')) {
+            return $this->service__deleteFromService($invoice, $request);
+        }
+
+        // Submit to service.
+        if ($request->has('submitToService')) {
+            return $this->service__submitToService($invoice, $request);
+        }
+
         $invoice->storage()->update(
             $request->all()
         );

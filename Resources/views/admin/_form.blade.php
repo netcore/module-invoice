@@ -25,9 +25,18 @@
         </div>
     </div>
 
+    @if(isset($model) && $model->exists)
+        <div class="row">
+            <div class="col-xs-12">
+                @include('invoice::admin.form.shipping')
+            </div>
+        </div>
+    @endif
+
     <div class="row">
         <div class="col-md-12">
             @include('invoice::admin.form.items')
+            <hr>
             @include('invoice::admin.form.totals')
         </div>
     </div>

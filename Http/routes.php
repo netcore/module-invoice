@@ -56,4 +56,9 @@ Route::group([
         'uses' => 'InvoiceController@destroy',
         'as'   => 'destroy'
     ]);
+
+    Route::get('/print-label/{invoice}', [
+        'uses' => 'InvoiceController@printParcelLabel',
+        'as'   => 'print-label'
+    ]);
 });

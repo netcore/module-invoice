@@ -33,15 +33,8 @@ class CreateNetcoreInvoiceInvoicesTable extends Migration
                 $table->foreign('payment_id')->references('id')->on('netcore_payment__payments')->onDelete('restrict');
             }
 
-            if (Module::has('Product')) {
-                $table->unsignedInteger('shipping_option_id');
-                $table->unsignedInteger('shipping_option_location_id')->nullable();
-            }
-
             $table->string('currency_symbol', 5)->nullable();
             $table->string('currency_code', 3)->nullable();
-
-            $table->boolean('is_sent')->default(false);
 
             $table->timestamps();
             $table->softDeletes();
