@@ -70,6 +70,14 @@
     $('body').on('click', '#add-invoice-item', function(){
         var itemId = randomString();
         var html = $('#invoice-item-template').html();
+
+        html = replaceAll('@{{ itemId }}', itemId, html);
+        $('#invoice-items-table tr:last').before(html);
+    });
+
+    $('body').on('click', '#add-invoice-shipping-item', function(){
+        var itemId = randomString();
+        var html = $('#invoice-shipping-item-template').html();
         html = replaceAll('@{{ itemId }}', itemId, html);
         $('#invoice-items-table tr:last').before(html);
     });
@@ -78,7 +86,7 @@
         var priceWithoutVat = 0;
         var priceWithVat = 0;
 
-        $('.invoice-item-tr').each(function(index, tr){
+        $('.invoice-item-tr').each(function(index, tr) {
 
             var trWithoutVat = parseFloat(
                 $(tr).find('.calculations-price-without-vat').val()
@@ -104,8 +112,9 @@
     };
 
     var keyupClasses = '.calculations-price-without-vat';
-    keyupClasses += ', .calculations-price-with-vat';
-    keyupClasses += ', .calculations-quantity';
+        keyupClasses += ', .calculations-price-with-vat';
+        keyupClasses += ', .calculations-quantity';
+
     $('body').on('keyup change', keyupClasses, function(){
         calculateTotals();
     });

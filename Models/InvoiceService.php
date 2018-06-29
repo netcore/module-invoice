@@ -27,6 +27,7 @@ class InvoiceService extends Model
     protected $fillable = [
         'shipping_option_id',
         'shipping_option_location_id',
+        'service_type',
         'is_sent_to_service',
         'service_side_id',
     ];

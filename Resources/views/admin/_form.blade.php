@@ -36,6 +36,7 @@
     <div class="row">
         <div class="col-md-12">
             @include('invoice::admin.form.items')
+            <hr>
             @include('invoice::admin.form.totals')
         </div>
     </div>

@@ -22,6 +22,7 @@ class CreateNetcoreInvoiceInvoiceServicesTable extends Migration
             $table->unsignedInteger('invoice_id');
             $table->unsignedInteger('shipping_option_id');
             $table->unsignedInteger('shipping_option_location_id')->nullable();
+            $table->string('service_type')->nullable();
             $table->boolean('is_sent_to_service')->default(false);
             $table->string('service_side_id')->nullable();
             $table->timestamps();

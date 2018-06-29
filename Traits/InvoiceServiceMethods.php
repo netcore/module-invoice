@@ -36,10 +36,10 @@ trait InvoiceServiceMethods
     {
         $shippingOption = $invoice->service->shippingOption;
 
+        $invoice->service->service_type = $request->input('service_type');
+
         if ($shippingOption->type == 'parcel_machine') {
-            $invoice->service->update([
-                'shipping_option_location_id' => $request->input('shipping_option_location_id'),
-            ]);
+            $invoice->service->shipping_option_location_id = $request->input('shipping_option_location_id');
         }
 
         // Service fields.
@@ -55,15 +55,20 @@ trait InvoiceServiceMethods
         $serviceHandler = app($shippingOption->handler);
         $shippingRecipient = new ShippingRecipient($invoice);
 
-        $psId = $invoice->service->shippingOptionLocation->fresh()->data->get('parcelshop_id');
+        // Parcelshop ID.
+        if ($shippingOption->isParcelshop()) {
+            $parcelShopLocationId = $invoice->service->shippingOptionLocation->location_id;
+        } else {
+            $parcelShopLocationId = null;
+        }
 
         try {
             $parcelId = $serviceHandler->createParcel($shippingRecipient, [
                 'parcels_count' => 1,
-                'parcelshop_id' => $psId,
+                'order_nr'      => $invoice->invoice_nr,
+                'parcelshop_id' => $parcelShopLocationId,
                 'service_type'  => $request->input('service_type'),
                 'weight'        => $invoice->service->getField('weight'),
-                'order_nr'      => $invoice->invoice_nr . str_random(5), // @TODO - remove str_random.
             ]);
 
             if (!$parcelId) {
@@ -71,10 +76,9 @@ trait InvoiceServiceMethods
                 return redirect(route('invoice::edit', $invoice) . '#shipping');
             }
 
-            $invoice->service->update([
-                'service_side_id'    => (string)$parcelId,
-                'is_sent_to_service' => true,
-            ]);
+            $invoice->service->service_side_id = (string)$parcelId;
+            $invoice->service->is_sent_to_service = true;
+            $invoice->service->save();
 
             session()->flash('shippingSuccess', 'Parcel successfully registered in service - ID: ' . $parcelId);
             return redirect(route('invoice::edit', $invoice) . '#shipping');

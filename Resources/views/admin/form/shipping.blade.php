@@ -58,7 +58,7 @@
 
                 <div class="form-group">
                     {{ Form::label('service_type', 'Service type:') }}
-                    {{ Form::select('service_type', $serviceTypes, null, [
+                    {{ Form::select('service_type', $serviceTypes, $model->service->service_type, [
                         'class' => 'form-control'
                     ]) }}
                 </div>
@@ -81,18 +81,15 @@
             </button>
         @else
             <button type="submit" class="btn btn-danger" name="deleteFromService">
-                <i class="fa fa-trash"></i> Delete parcel from service
+                <i class="fa fa-trash"></i>
+                Delete parcel {{ $handler->canBeDeletedUsingService() ? 'from service' : 'locally' }}
             </button>
 
-            <a href="{{ route('invoice::print-label', $model) }}" class="btn btn-warning" target="_blank">
-                <i class="fa fa-print"></i> Print parcel label
-            </a>
+            @if(method_exists($handler, 'getParcelLabel'))
+                <a href="{{ route('invoice::print-label', $model) }}" class="btn btn-warning" target="_blank">
+                    <i class="fa fa-print"></i> Print parcel label
+                </a>
+            @endif
         @endif
-    </div>
-
-    <div class="panel-footer text-right">
-        <button class="btn btn-info">
-            <i class="fa fa-plus"></i> Add shipping to invoice
-        </button>
     </div>
 </div>

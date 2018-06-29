@@ -23,16 +23,17 @@
         @include('invoice::admin.form._item_template')
     @endforeach
 
+    @php
+        $colSpan = count($configuredInvoiceItemVariables) + 5;
+    @endphp
+
     <tr>
-        <td></td>
-        <td></td>
-        <td></td>
-        <td></td>
-        @foreach($configuredInvoiceItemVariables as $configuredVariable)
-        <td></td>
-        @endforeach
-        <td>
-            <a class="btn btn-xs btn-success full-width max-width-100" id="add-invoice-item">
+        <td colspan="{{ $colSpan }}" class="text-right">
+            <a class="btn btn-xs btn-info" id="add-invoice-shipping-item">
+                Add delivery item
+            </a>
+
+            <a class="btn btn-xs btn-success" id="add-invoice-item">
                 Add item
             </a>
         </td>
@@ -42,4 +43,8 @@
 
 <script type="text/template" id="invoice-item-template">
     @include('invoice::admin.form._item_template', ['item' => null])
+</script>
+
+<script type="text/template" id="invoice-shipping-item-template">
+    @include('invoice::admin.form._shipping_item_template')
 </script>
