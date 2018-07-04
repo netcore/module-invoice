@@ -59,7 +59,7 @@
 
     <td>
         {{ Form::number('items['.$itemId.'][price_without_vat]', $priceWithoutVat, [
-            'class' => 'form-control calculations-price-without-vat',
+            'class' => 'form-control calculations-price-without-vat calculations-input',
             'autocomplete' => 'off',
             'min' => '-9999',
             'max' => '9999',
@@ -69,7 +69,7 @@
 
     <td>
         {{ Form::number('items['.$itemId.'][price_with_vat]', $priceWithVat, [
-            'class' => 'form-control calculations-price-with-vat',
+            'class' => 'form-control calculations-price-with-vat calculations-input',
             'autocomplete' => 'off',
             'min' => '-9999',
             'max' => '9999',
