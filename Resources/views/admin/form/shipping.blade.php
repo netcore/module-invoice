@@ -65,30 +65,32 @@
             @endif
         @endif
 
-        <div class="form-group">
-            {{ Form::label('weight', 'Weight (kg):') }}
-            {{ Form::number('serviceFields[weight]', $model->service->getField('weight'), [
-                'class' => 'form-control',
-                'id'    => 'weight',
-                'step'  => 0.1,
-                'min'   => 0
-            ]) }}
-        </div>
+        @if($model->service->handler)
+            <div class="form-group">
+                {{ Form::label('weight', 'Weight (kg):') }}
+                {{ Form::number('serviceFields[weight]', $model->service->getField('weight'), [
+                    'class' => 'form-control',
+                    'id'    => 'weight',
+                    'step'  => 0.1,
+                    'min'   => 0
+                ]) }}
+            </div>
 
-        @if(!$model->service->is_sent_to_service)
-            <button type="submit" class="btn btn-warning" name="submitToService">
-                <i class="fa fa-paper-plane-o"></i> Send to service
-            </button>
-        @else
-            <button type="submit" class="btn btn-danger" name="deleteFromService">
-                <i class="fa fa-trash"></i>
-                Delete parcel {{ $handler->canBeDeletedUsingService() ? 'from service' : 'locally' }}
-            </button>
+            @if(!$model->service->is_sent_to_service)
+                <button type="submit" class="btn btn-warning" name="submitToService">
+                    <i class="fa fa-paper-plane-o"></i> Send to service
+                </button>
+            @else
+                <button type="submit" class="btn btn-danger" name="deleteFromService">
+                    <i class="fa fa-trash"></i>
+                    Delete parcel {{ $handler->canBeDeletedUsingService() ? 'from service' : 'locally' }}
+                </button>
 
-            @if(method_exists($handler, 'getParcelLabel'))
-                <a href="{{ route('invoice::print-label', $model) }}" class="btn btn-warning" target="_blank">
-                    <i class="fa fa-print"></i> Print parcel label
-                </a>
+                @if(method_exists($handler, 'getParcelLabel'))
+                    <a href="{{ route('invoice::print-label', $model) }}" class="btn btn-warning" target="_blank">
+                        <i class="fa fa-print"></i> Print parcel label
+                    </a>
+                @endif
             @endif
         @endif
     </div>
