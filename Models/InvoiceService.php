@@ -51,7 +51,7 @@ class InvoiceService extends Model
      */
     public function shippingOption(): BelongsTo
     {
-        return $this->belongsTo(ShippingOption::class);
+        return $this->belongsTo(ShippingOption::class)->withTrashed();
     }
 
     /**

@@ -3,8 +3,18 @@
 <div class="panel panel-default">
     <div class="panel-body">
         @php
-            $shippingOptions = \Modules\Product\Models\ShippingOption::with('translations', 'locations')->get();
-            $shippingOptionsList = $shippingOptions->pluck('name', 'id');
+            use Modules\Product\Models\ShippingOption;
+
+            $shippingOptions = ShippingOption::withTrashed()->with('translations', 'locations')->get();
+            $shippingOptionsList = [];
+
+            foreach ($shippingOptions as $shippingOption) {
+                $name = $shippingOption->trashed() ? '[DELETED] ' : '';
+                $name .= $shippingOption->name;
+
+                $shippingOptionsList[$shippingOption->id] = $name;
+            }
+
             $handler = app($model->service->shippingOption->handler);
         @endphp
 
